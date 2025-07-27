@@ -41,14 +41,14 @@ export class UserService {
   }
 
   async updateRefreshTokenHash(userId: number, refreshToken?: string) {
-    let hashedToken = '';
+    let refreshTokenHash = '';
     if (refreshToken) {
-      hashedToken = await hashData(refreshToken);
+      refreshTokenHash = await hashData(refreshToken);
     }
 
     return this.prisma.user.update({
       where: { id: userId },
-      data: { refreshTokenHash: hashedToken },
+      data: { refreshTokenHash },
     });
   }
 
