@@ -1,0 +1,40 @@
+import { ClassSerializerInterceptor, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { APP_FILTER, APP_INTERCEPTOR } from '@nestjs/core';
+import { PrismaModule } from './prisma/prisma.module';
+import { UserModule } from './modules/users/user.module';
+import { CategoryModule } from './modules/categories/category.module';
+import { SupplierModule } from './modules/suppliers/supplier.module';
+import { ProductModule } from './modules/products/product.module';
+import { GoodsReceiptModule } from './modules/goods-receipts/goods-receipt.module';
+import { SaleTransactionModule } from './modules/sale-transactions/sale-transaction.module';
+import { PrismaClientExceptionFilter } from './prisma/prisma-client-exception.filter';
+import appConfig from './config/app.config';
+
+@Module({
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      load: [appConfig],
+    }),
+    PrismaModule,
+    UserModule,
+    CategoryModule,
+    SupplierModule,
+    ProductModule,
+    GoodsReceiptModule,
+    SaleTransactionModule,
+  ],
+  controllers: [],
+  providers: [
+    {
+      provide: APP_FILTER,
+      useClass: PrismaClientExceptionFilter,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ClassSerializerInterceptor,
+    },
+  ],
+})
+export class AppModule {}
