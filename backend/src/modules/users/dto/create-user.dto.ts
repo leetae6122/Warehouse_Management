@@ -21,6 +21,7 @@ export class CreateUserDto {
   @NotContains(' ', { message: 'Username should not contain spaces' })
   @Transform(normalizeStringDto)
   @IsNotEmpty()
+  @ApiProperty()
   username: string;
 
   @MaxLength(20)

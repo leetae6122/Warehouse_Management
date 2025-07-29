@@ -3,70 +3,47 @@ import {
   NestInterceptor,
   ExecutionContext,
   CallHandler,
-  InternalServerErrorException,
 } from '@nestjs/common';
-import { plainToClass, ClassConstructor } from 'class-transformer';
-import { Observable, firstValueFrom, of } from 'rxjs';
-import { switchMap, map, catchError } from 'rxjs/operators';
+import { plainToInstance } from 'class-transformer';
+import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 
-interface ResponseData<T> {
-  statusCode: number;
-  message: string;
-  data: T | T[];
-}
+type ClassType<T> = new (...args: any[]) => T;
 
 @Injectable()
-export class TransformDtoInterceptor<T>
-  implements NestInterceptor<T, ResponseData<T>>
-{
-  constructor(private readonly classType: ClassConstructor<T>) {}
+export class TransformDtoInterceptor<T> implements NestInterceptor {
+  constructor(private readonly classType: ClassType<T>) {}
 
-  async intercept(
-    context: ExecutionContext,
-    next: CallHandler,
-  ): Promise<Observable<ResponseData<T>>> {
+  intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     return next.handle().pipe(
-      switchMap(async (response: ResponseData<T>) => {
-        try {
-          if (!response || !response.data) {
-            return response;
-          }
-
-          // Xử lý mảng dữ liệu
-          if (Array.isArray(response.data)) {
-            response.data = await this.transformArray(response.data);
-            return response;
-          }
-
-          // Xử lý object đơn lẻ
-          response.data = this.transformObject(response.data);
+      map((response) => {
+        if (!response || typeof response !== 'object') {
           return response;
-        } catch (error) {
-          throw new InternalServerErrorException(
-            'Lỗi trong quá trình transform dữ liệu',
-          );
         }
-      }),
-      catchError((error) => {
-        throw new InternalServerErrorException(
-          `Lỗi transform DTO: ${error.message}`,
-        );
+
+        // Handle standard NestJS response format
+        if ('data' in response) {
+          return {
+            ...response,
+            data: this.transformData(response.data),
+          };
+        }
+
+        // If response doesn't follow standard format, transform the entire response
+        return this.transformData(response);
       }),
     );
   }
 
-  private async transformArray(data: T[]): Promise<T[]> {
-    return firstValueFrom(
-      of(data).pipe(
-        map((items) => items.map((item) => this.transformObject(item))),
-      ),
-    );
-  }
+  private transformData(data: any): any {
+    if (data === undefined || data === null) {
+      return data;
+    }
 
-  private transformObject(data: T): T {
-    return plainToClass(this.classType, data, {
-      excludeExtraneousValues: true,
-      enableImplicitConversion: true,
-    });
+    if (Array.isArray(data)) {
+      return plainToInstance(this.classType, data);
+    }
+
+    return plainToInstance(this.classType, data);
   }
 }

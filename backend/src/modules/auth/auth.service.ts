@@ -5,14 +5,14 @@ import {
 } from '@nestjs/common';
 import {
   MSG_INVALID_TOKEN,
-  MSG_LOGIN_SUCCESSFUL,
-  MSG_LOGOUT_SUCCESSFUL,
   MSG_REFRESH_TOKEN_DOES_NOT_MATCH,
-  MSG_REFRESH_TOKEN_SUCCESSFUL,
   MSG_USER_NOT_FOUND,
   MSG_WRONG_LOGIN_INFORMATION,
 } from '../../common/utils/message.util';
-import { compareHashedData } from '../../common/utils/hash.util';
+import {
+  compareHashedData,
+  isJwtMatchHashed,
+} from '../../common/utils/hash.util';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import {
   createJWT,
@@ -22,13 +22,17 @@ import {
 import { UserService } from '../users/user.service';
 import { UserDto } from '../users/dto/user.dto';
 import { Request } from 'express';
-import { IJwtPayload } from './interfaces/auth.interface';
+import {
+  IJwtPayload,
+  ILoginResponse,
+  IVerifyJwtPayload,
+} from './interfaces/auth.interface';
 
 @Injectable()
 export class AuthService {
   constructor(private readonly userService: UserService) {}
 
-  async login(data: LoginAuthDto) {
+  async login(data: LoginAuthDto): Promise<ILoginResponse> {
     const { username, password, isRemember } = data;
     const foundUser = await this.userService.findByUsername(username);
     if (!foundUser) {
@@ -54,17 +58,21 @@ export class AuthService {
     }
 
     return {
-      message: MSG_LOGIN_SUCCESSFUL,
       accessToken: accessToken,
       refreshToken: refreshToken,
-      data: foundUser,
+      user: {
+        id: foundUser.id,
+        username: foundUser.username,
+        fullName: foundUser.fullName,
+        role: foundUser.role,
+      },
     };
   }
 
   async logout(user: UserDto) {
-    await this.userService.updateRefreshTokenHash(user.id);
-
-    return { message: MSG_LOGOUT_SUCCESSFUL };
+    return (await this.userService.updateRefreshTokenHash(user.id))
+      ? true
+      : false;
   }
 
   async refreshToken(req: Request) {
@@ -73,30 +81,36 @@ export class AuthService {
       throw new UnauthorizedException(MSG_INVALID_TOKEN);
     }
 
-    const payload: IJwtPayload = verifyToken(refreshToken, TokenType.REFRESH);
+    const verifyPayload: IVerifyJwtPayload = verifyToken(
+      refreshToken,
+      TokenType.REFRESH,
+    );
 
-    const foundUser = await this.userService.findOne(payload.id);
+    const foundUser = await this.userService.findOne(verifyPayload.id);
     if (!foundUser) {
       throw new BadRequestException(MSG_USER_NOT_FOUND);
     }
-
-    const isMatch = await compareHashedData(
-      refreshToken.slice(refreshToken.lastIndexOf('.')),
+    const isMatch = isJwtMatchHashed(
+      refreshToken,
       foundUser.refreshTokenHash || '',
     );
     if (!isMatch) {
       throw new BadRequestException(MSG_REFRESH_TOKEN_DOES_NOT_MATCH);
     }
+
+    const payload: IJwtPayload = {
+      id: foundUser.id,
+      username: foundUser.username,
+      role: foundUser.role,
+    };
     const newAccessToken = createJWT(payload, TokenType.ACCESS);
     const newRefreshToken = createJWT(payload, TokenType.REFRESH);
-
     await this.userService.updateRefreshTokenHash(
       foundUser.id,
       newRefreshToken,
     );
 
     return {
-      message: MSG_REFRESH_TOKEN_SUCCESSFUL,
       accessToken: newAccessToken,
       refreshToken: newRefreshToken,
     };

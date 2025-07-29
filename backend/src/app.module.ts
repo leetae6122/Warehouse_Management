@@ -10,6 +10,7 @@ import { GoodsReceiptModule } from './modules/goods-receipts/goods-receipt.modul
 import { SaleTransactionModule } from './modules/sale-transactions/sale-transaction.module';
 import { PrismaClientExceptionFilter } from './prisma/prisma-client-exception.filter';
 import appConfig from './config/app.config';
+import { AuthModule } from './modules/auth/auth.module';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import appConfig from './config/app.config';
       load: [appConfig],
     }),
     PrismaModule,
+    AuthModule,
     UserModule,
     CategoryModule,
     SupplierModule,

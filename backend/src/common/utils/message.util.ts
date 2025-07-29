@@ -24,7 +24,7 @@ export const MSG_DELETED_SUCCESSFUL = (e: string) =>
 // AUTH API
 export const MSG_WRONG_LOGIN_INFORMATION =
   'Your username/password is incorrect';
-export const MSG_USER_EXISTS = 'Username or email already exists';
+export const MSG_USER_EXISTS = 'Username already exists';
 export const MSG_USERNAME_EMPTY =
   'The username cannot be empty. Please enter your username';
 export const MSG_PASSWORD_EMPTY =
