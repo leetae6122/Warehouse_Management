@@ -22,6 +22,7 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { User } from 'src/common/decorators/user.decorator';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -45,11 +46,16 @@ export class UserController {
   }
 
   @Patch(':id')
-  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+  async update(
+    @User('id') userIdReq: string,
+    @Param('id') id: string,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    const foundUser = await this.userService.checkUserOwner(+userIdReq, +id);
     return {
       statusCode: 200,
       message: MSG_UPDATED_SUCCESSFUL('User'),
-      data: await this.userService.update(+id, updateUserDto),
+      data: await this.userService.update(foundUser.id, updateUserDto),
     };
   }
 
@@ -63,10 +69,11 @@ export class UserController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  async findOne(@User('id') userIdReq: string, @Param('id') id: string) {
+    const foundUser = await this.userService.checkUserOwner(+userIdReq, +id);
     return {
       statusCode: 200,
-      data: this.userService.findOne(+id),
+      data: foundUser,
     };
   }
 }

@@ -1,9 +1,16 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hashData, hashTokenSHA256 } from 'src/common/utils/hash.util';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { MSG_USER_NOT_FOUND } from 'src/common/utils/message.util';
+import {
+  MSG_NOT_FOUND,
+  MSG_USER_NOT_OWNER,
+} from 'src/common/utils/message.util';
 
 @Injectable()
 export class UserService {
@@ -26,7 +33,7 @@ export class UserService {
     });
 
     if (!user) {
-      throw new NotFoundException(MSG_USER_NOT_FOUND);
+      throw new NotFoundException(MSG_NOT_FOUND('User'));
     }
 
     const updateData: UpdateUserDto = { ...updateUserDto };
@@ -66,5 +73,15 @@ export class UserService {
     return await this.prisma.user.findUnique({
       where: { username },
     });
+  }
+
+  async checkUserOwner(userIdReq: number, uId: number) {
+    const foundUser = await this.findOne(uId);
+    if (!foundUser) {
+      throw new BadRequestException(MSG_NOT_FOUND('User'));
+    }
+    if (foundUser.id !== userIdReq)
+      throw new BadRequestException(MSG_USER_NOT_OWNER);
+    return foundUser;
   }
 }
