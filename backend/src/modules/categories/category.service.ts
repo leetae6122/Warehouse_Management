@@ -12,6 +12,13 @@ export class CategoryService {
     });
   }
 
+  async update(id: number, updateCategoryDto: CreateCategoryDto) {
+    return this.prisma.category.update({
+      where: { id },
+      data: updateCategoryDto,
+    });
+  }
+
   async findAll() {
     return this.prisma.category.findMany({
       include: {
