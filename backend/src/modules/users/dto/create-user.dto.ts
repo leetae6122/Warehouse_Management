@@ -12,8 +12,7 @@ import {
   MinLength,
   NotContains,
 } from 'class-validator';
-export const normalizeStringDto = ({ value }: { value: string }) =>
-  value.trim().replace(/ +/g, ' ');
+import { normalizeStringDto } from 'src/common/utils/func.util';
 
 export class CreateUserDto {
   @MaxLength(30)
