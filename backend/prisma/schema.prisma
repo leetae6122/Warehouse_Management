@@ -19,11 +19,16 @@ enum Role {
 }
 
 enum Unit {
-  CAN
-  BOTTLE
-  BOX
-  KG
-  PACK
+  CAN        //Lon
+  BOTTLE     //Lọ
+  BOX        //Hộp
+  KG         //Kilogram
+  PACK       //Gói
+  PIECE      //Cái
+  SET        //Bộ
+  CARTON     //Thùng
+  L          //Lít
+  Roll       //Cuộn
 }
 
 model User {
