@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import {
   MSG_INVALID_TOKEN,
+  MSG_NOT_FOUND,
   MSG_REFRESH_TOKEN_DOES_NOT_MATCH,
-  MSG_USER_NOT_FOUND,
   MSG_WRONG_LOGIN_INFORMATION,
 } from '../../common/utils/message.util';
 import {
@@ -88,7 +88,7 @@ export class AuthService {
 
     const foundUser = await this.userService.findOne(verifyPayload.id);
     if (!foundUser) {
-      throw new BadRequestException(MSG_USER_NOT_FOUND);
+      throw new BadRequestException(MSG_NOT_FOUND('User'));
     }
     const isMatch = isJwtMatchHashed(
       refreshToken,

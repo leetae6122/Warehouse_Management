@@ -19,9 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     const user = await this.userService.findOne(payload.id);
 
     if (!user) {
-      throw new UnauthorizedException(
-        'Token không hợp lệ hoặc người dùng không tồn tại',
-      );
+      throw new UnauthorizedException('Invalid token or user does not exist');
     }
 
     return {
