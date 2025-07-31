@@ -6,15 +6,12 @@ import {
   Param,
   Patch,
   UseGuards,
-  NotFoundException,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
-import { CategoryDto } from './dto/category.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('categories')
@@ -33,16 +30,7 @@ export class CategoryController {
     @Param('id') id: string,
     @Body() updateCategoryDto: CreateCategoryDto,
   ) {
-    const foundCategory = (await this.categoryService.findOne(
-      +id,
-    )) as CategoryDto;
-    if (!foundCategory) {
-      throw new NotFoundException(MSG_NOT_FOUND('Category'));
-    }
-    return await this.categoryService.update(
-      foundCategory.id,
-      updateCategoryDto,
-    );
+    return await this.categoryService.update(+id, updateCategoryDto);
   }
 
   @Get()

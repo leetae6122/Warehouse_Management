@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
+import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
 
 @Injectable()
 export class SupplierService {
@@ -14,6 +15,12 @@ export class SupplierService {
   }
 
   async update(id: number, updateSupplierDto: UpdateSupplierDto) {
+    const foundSupplier = await this.prisma.supplier.findUnique({
+      where: { id },
+    });
+    if (!foundSupplier) {
+      throw new NotFoundException(MSG_NOT_FOUND('Supplier'));
+    }
     return await this.prisma.supplier.update({
       where: { id },
       data: updateSupplierDto,
