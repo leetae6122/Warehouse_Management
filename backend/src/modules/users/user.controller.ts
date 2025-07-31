@@ -17,8 +17,10 @@ import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import {
   MSG_CREATED_SUCCESSFUL,
+  MSG_NOT_FOUND,
   MSG_UPDATED_SUCCESSFUL,
   MSG_USER_EXISTS,
+  MSG_USER_NOT_OWNER,
 } from 'src/common/utils/message.util';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
@@ -51,7 +53,13 @@ export class UserController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const foundUser = await this.userService.checkUserOwner(+userIdReq, +id);
+    const foundUser = await this.userService.findOne(+id);
+    if (!foundUser) {
+      throw new BadRequestException(MSG_NOT_FOUND('User'));
+    }
+    if (foundUser.id !== +userIdReq) {
+      throw new BadRequestException(MSG_USER_NOT_OWNER);
+    }
     return {
       statusCode: 200,
       message: MSG_UPDATED_SUCCESSFUL('User'),
@@ -70,7 +78,13 @@ export class UserController {
 
   @Get(':id')
   async findOne(@User('id') userIdReq: string, @Param('id') id: string) {
-    const foundUser = await this.userService.checkUserOwner(+userIdReq, +id);
+    const foundUser = await this.userService.findOne(+id);
+    if (!foundUser) {
+      throw new BadRequestException(MSG_NOT_FOUND('User'));
+    }
+    if (foundUser.id !== +userIdReq) {
+      throw new BadRequestException(MSG_USER_NOT_OWNER);
+    }
     return {
       statusCode: 200,
       data: foundUser,
