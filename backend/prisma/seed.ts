@@ -1,24 +1,14 @@
-// prisma/seed.ts
-
 import { PrismaClient, Role, Unit } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
 import { Decimal } from '@prisma/client/runtime/library';
+import * as bcrypt from 'bcrypt';
 
-// Khởi tạo Prisma Client
 const prisma = new PrismaClient();
 
-// Hàm hash mật khẩu
 async function hashPassword(password: string): Promise<string> {
   const saltRounds = 10;
   return bcrypt.hash(password, saltRounds);
 }
-
 async function main() {
-  console.log('🚀 Bắt đầu quá trình seeding...');
-
-  // --- DỌN DẸP DATABASE (Tùy chọn nhưng khuyến khích) ---
-  // Xóa theo thứ tự ngược lại để tránh lỗi khóa ngoại
-  console.log('🔥 Dọn dẹp database cũ...');
   await prisma.saleItem.deleteMany();
   await prisma.saleTransaction.deleteMany();
   await prisma.receiptItem.deleteMany();
@@ -28,21 +18,19 @@ async function main() {
   await prisma.category.deleteMany();
   await prisma.supplier.deleteMany();
   await prisma.user.deleteMany();
-  console.log('✅ Database đã được dọn dẹp.');
 
-  // --- 1. TẠO USERS ---
-  console.log('👤 Tạo người dùng...');
-  const hashedPassword = await hashPassword('123456'); // Mật khẩu chung cho tất cả
-  const adminUser = await prisma.user.create({
+  // Tạo users
+  const hashedPassword = await hashPassword('123456');
+  const admin = await prisma.user.create({
     data: {
       username: 'admin',
-      password: hashedPassword,
+      password: hashedPassword, // Mật khẩu đã băm (ví dụ: "admin123")
       fullName: 'Quản Trị Viên',
       role: Role.ADMIN,
     },
   });
 
-  const managerUser = await prisma.user.create({
+  const manager = await prisma.user.create({
     data: {
       username: 'manager01',
       password: hashedPassword,
@@ -51,174 +39,143 @@ async function main() {
     },
   });
 
-  const staffUser = await prisma.user.create({
+  const staff = await prisma.user.create({
     data: {
-      username: 'staff01',
-      password: hashedPassword,
+      username: 'nhanvien1',
+      password: hashedPassword, // Mật khẩu đã băm
       fullName: 'Trần Thị Nhân Viên',
       role: Role.STAFF,
     },
   });
-  console.log('✅ Đã tạo người dùng.');
 
-  // --- 2. TẠO CATEGORIES ---
-  console.log('📚 Tạo danh mục sản phẩm...');
-  const beverageCategory = await prisma.category.create({
+  // Tạo categories
+  const instantNoodles = await prisma.category.create({
+    data: { name: 'Mì ăn liền' },
+  });
+
+  const beverages = await prisma.category.create({
     data: { name: 'Đồ uống' },
   });
-  const foodCategory = await prisma.category.create({
-    data: { name: 'Thực phẩm khô' },
-  });
-  const householdCategory = await prisma.category.create({
-    data: { name: 'Đồ gia dụng' },
-  });
-  console.log('✅ Đã tạo danh mục.');
 
-  // --- 3. TẠO SUPPLIERS ---
-  console.log('🚚 Tạo nhà cung cấp...');
-  const supplierA = await prisma.supplier.create({
+  // Tạo suppliers
+  const acecook = await prisma.supplier.create({
     data: {
-      name: 'Công ty Nước Giải Khát Tân Hiệp Phát',
-      contactInfo: '02743755161',
-    },
-  });
-  const supplierB = await prisma.supplier.create({
-    data: { name: 'Acecook Việt Nam', contactInfo: '02838154064' },
-  });
-  const supplierC = await prisma.supplier.create({
-    data: { name: 'Tổng kho Gia Dụng Miền Nam', contactInfo: '0987654321' },
-  });
-  console.log('✅ Đã tạo nhà cung cấp.');
-
-  // --- 4. TẠO PRODUCTS ---
-  console.log('📦 Tạo sản phẩm...');
-  const product1 = await prisma.product.create({
-    data: {
-      name: 'Nước tăng lực Number 1',
-      sku: 'NUOC_001',
-      price: new Decimal('10000.00'),
-      unit: Unit.BOTTLE,
-      categoryId: beverageCategory.id,
-      suppliers: {
-        connect: [{ id: supplierA.id }], // Kết nối với nhà cung cấp
-      },
+      name: 'Công ty Acecook Việt Nam',
+      contactInfo: 'Hotline: 1800 6155',
     },
   });
 
-  const product2 = await prisma.product.create({
+  const pepsiCo = await prisma.supplier.create({
     data: {
-      name: 'Mì Hảo Hảo Tôm Chua Cay',
-      sku: 'MI_001',
-      price: new Decimal('4500.00'),
+      name: 'PepsiCo Việt Nam',
+      contactInfo: 'Hotline: 028 5412 3456',
+    },
+  });
+
+  // Tạo products
+  const miHaoHao = await prisma.product.create({
+    data: {
+      name: 'Mì Hảo Hảo tôm chua cay 75g',
+      sku: 'MHH01',
+      description: 'Mì ăn liền Hảo Hảo vị tôm chua cay, gói 75g',
+      price: new Decimal(4500), // Giá bán lẻ mỗi gói
       unit: Unit.PACK,
-      categoryId: foodCategory.id,
+      imageUrl: 'https://example.com/mi-hao-hao.jpg',
+      categoryId: instantNoodles.id,
       suppliers: {
-        connect: [{ id: supplierB.id }],
+        connect: [{ id: acecook.id }],
       },
     },
   });
 
-  const product3 = await prisma.product.create({
+  const pepsiCan = await prisma.product.create({
     data: {
-      name: 'Thùng mì Hảo Hảo',
-      sku: 'MI_002',
-      price: new Decimal('125000.00'),
-      unit: Unit.CARTON,
-      categoryId: foodCategory.id,
+      name: 'Pepsi Lon 330ml',
+      sku: 'PEPSI01',
+      description: 'Pepsi lon 330ml',
+      price: new Decimal(10000),
+      unit: Unit.CAN,
+      imageUrl: 'https://example.com/pepsi.jpg',
+      categoryId: beverages.id,
       suppliers: {
-        connect: [{ id: supplierB.id }],
+        connect: [{ id: pepsiCo.id }],
       },
     },
   });
 
-  const product4 = await prisma.product.create({
+  // Tạo goods receipt (nhập kho) - 1 thùng mì = 30 gói
+  const receiptDate = new Date();
+  const goodsReceipt = await prisma.goodsReceipt.create({
     data: {
-      name: 'Nước rửa chén Sunlight Chanh',
-      sku: 'GD_001',
-      price: new Decimal('22000.00'),
-      unit: Unit.BOTTLE,
-      categoryId: householdCategory.id,
-      suppliers: {
-        connect: [{ id: supplierC.id }],
-      },
-    },
-  });
-  console.log('✅ Đã tạo sản phẩm.');
-
-  // --- 5. TẠO PHIẾU NHẬP HÀNG (GoodsReceipt) ---
-  console.log('📥 Tạo phiếu nhập hàng...');
-  await prisma.goodsReceipt.create({
-    data: {
-      supplierId: supplierB.id,
-      userId: managerUser.id,
-      totalAmount: new Decimal('5000000.00'), // 40 thùng * 125000
+      totalAmount: new Decimal(30 * 3000), // Giả sử giá nhập mỗi gói 3,000đ
+      supplierId: acecook.id,
+      userId: manager.id,
+      createdAt: receiptDate,
       items: {
         create: [
           {
-            productId: product3.id,
-            quantity: 40,
-            remainingQuantity: 40,
-            importPrice: new Decimal('125000.00'),
-            expiryDate: new Date('2026-12-31'),
+            quantity: 30,
+            remainingQuantity: 30, // Ban đầu = tổng nhập
+            importPrice: new Decimal(3000), // Giá nhập mỗi gói
+            expiryDate: new Date('2025-12-31'),
+            productId: miHaoHao.id,
+          },
+          {
+            quantity: 24, // 1 thùng Pepsi 24 lon
+            remainingQuantity: 24,
+            importPrice: new Decimal(8000), // Giá nhập mỗi lon
+            expiryDate: new Date('2024-12-31'),
+            productId: pepsiCan.id,
           },
         ],
       },
     },
+    include: { items: true },
   });
 
-  await prisma.goodsReceipt.create({
+  // Tạo sale transaction (bán 10 gói mì)
+  const saleDate = new Date();
+  const saleTransaction = await prisma.saleTransaction.create({
     data: {
-      supplierId: supplierA.id,
-      userId: managerUser.id,
-      totalAmount: new Decimal('800000.00'), // 100 chai * 8000
+      totalAmount: new Decimal(10 * 4500), // 10 gói x 4,500đ
+      userId: staff.id,
+      createdAt: saleDate,
       items: {
         create: [
           {
-            productId: product1.id,
-            quantity: 100,
-            remainingQuantity: 100,
-            importPrice: new Decimal('8000.00'),
-          },
-        ],
-      },
-    },
-  });
-  console.log('✅ Đã tạo phiếu nhập hàng.');
-
-  // --- 6. TẠO GIAO DỊCH BÁN HÀNG (SaleTransaction) ---
-  console.log('💰 Tạo giao dịch bán hàng...');
-  const saleTotalAmount = product2.price.mul(10).add(product1.price.mul(2));
-  await prisma.saleTransaction.create({
-    data: {
-      userId: staffUser.id,
-      totalAmount: saleTotalAmount,
-      items: {
-        create: [
-          {
-            productId: product2.id, // Mì gói
             quantity: 10,
-            priceAtSale: product2.price,
-          },
-          {
-            productId: product1.id, // Nước tăng lực
-            quantity: 2,
-            priceAtSale: product1.price,
+            priceAtSale: new Decimal(4500), // Giá bán tại thời điểm
+            productId: miHaoHao.id,
           },
         ],
       },
     },
   });
-  console.log('✅ Đã tạo giao dịch bán hàng.');
+
+  // Cập nhật tồn kho sau khi bán (giảm remainingQuantity)
+  const receiptItem = goodsReceipt.items.find(
+    (i) => i.productId === miHaoHao.id,
+  );
+  if (receiptItem) {
+    await prisma.receiptItem.update({
+      where: { id: receiptItem.id },
+      data: {
+        remainingQuantity: receiptItem.remainingQuantity - 10,
+      },
+    });
+  }
+
+  console.log('Dữ liệu seed đã được tạo thành công!');
+  console.table({
+    'Mì Hảo Hảo sau khi bán': `Tồn kho: ${receiptItem ? receiptItem.remainingQuantity - 10 : 'N/A'} gói`,
+  });
 }
 
-// Chạy hàm main và xử lý lỗi
 main()
   .catch((e) => {
-    console.error('❌ Đã xảy ra lỗi trong quá trình seeding:', e);
+    console.error(e);
     process.exit(1);
   })
   .finally(async () => {
-    // Đảm bảo ngắt kết nối Prisma Client
     await prisma.$disconnect();
-    console.log('👋 Đã ngắt kết nối Prisma Client. Seeding hoàn tất!');
   });
