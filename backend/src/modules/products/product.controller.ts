@@ -1,28 +1,115 @@
-import { Controller, Get, Post, Body, Param } from '@nestjs/common';
+import { FileService } from './../files/file.service';
+import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
+import { UpdateProductDto } from './dto/update-product.dto';
+import { UploadedFile, UseInterceptors } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import appConfig from 'src/config/app.config';
+import { handleException } from 'src/common/utils/exception.util';
 
 @Controller('products')
 export class ProductController {
-  constructor(private readonly productService: ProductService) {}
+  constructor(
+    private readonly productService: ProductService,
+    private readonly fileService: FileService,
+  ) {}
 
   @Post()
-  create(@Body() createProductDto: CreateProductDto) {
-    return this.productService.create(createProductDto);
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      FileService.multerOptions({
+        fileSize: 5,
+        folder: 'products',
+      }),
+    ),
+  )
+  async create(
+    @Body() createProductDto: CreateProductDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    try {
+      if (file) {
+        const imageUrl =
+          appConfig().upload.domain +
+          file.path.slice(file.path.indexOf('uploads'));
+        createProductDto.imageUrl = imageUrl;
+      }
+      return await this.productService.create(createProductDto);
+    } catch (error: unknown) {
+      if (file) {
+        this.fileService.deleteFile(file.path, 'products');
+      }
+      throw handleException(error, {
+        defaultMessage: 'Failed to create product',
+      });
+    }
+  }
+
+  @Patch(':id')
+  @UseInterceptors(
+    FileInterceptor(
+      'image',
+      FileService.multerOptions({
+        fileSize: 5,
+        folder: 'products',
+      }),
+    ),
+  )
+  update(
+    @Param('id') id: string,
+    @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() file?: Express.Multer.File,
+  ) {
+    try {
+      if (file) {
+        const imageUrl =
+          appConfig().upload.domain +
+          file.path.slice(file.path.indexOf('uploads'));
+        updateProductDto.imageUrl = imageUrl;
+      }
+      return this.productService.update(+id, updateProductDto);
+    } catch (error: unknown) {
+      if (file) {
+        this.fileService.deleteFile(file.path, 'products');
+      }
+      throw handleException(error, {
+        defaultMessage: 'Failed to update product',
+      });
+    }
   }
 
   @Get()
   findAll() {
-    return this.productService.findAll();
+    try {
+      return this.productService.findAll();
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: 'Failed to get product',
+      });
+    }
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+    try {
+      return this.productService.findOne(+id);
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: 'Failed to get product',
+      });
+    }
   }
 
   @Get(':id/stock')
   getStock(@Param('id') id: string) {
-    return this.productService.getStock(+id);
+    try {
+      return this.productService.getStock(+id);
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: 'Failed to get product stock',
+      });
+    }
   }
 }
