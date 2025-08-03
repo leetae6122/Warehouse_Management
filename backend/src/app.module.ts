@@ -11,6 +11,8 @@ import { SaleTransactionModule } from './modules/sale-transactions/sale-transact
 import { PrismaClientExceptionFilter } from './prisma/prisma-client-exception.filter';
 import appConfig from './config/app.config';
 import { AuthModule } from './modules/auth/auth.module';
+import { FileModule } from './modules/files/file.module';
+import { ExceptionInterceptor } from './common/interceptors/exception.interceptor';
 
 @Module({
   imports: [
@@ -26,6 +28,7 @@ import { AuthModule } from './modules/auth/auth.module';
     ProductModule,
     GoodsReceiptModule,
     SaleTransactionModule,
+    FileModule,
   ],
   controllers: [],
   providers: [
@@ -36,6 +39,10 @@ import { AuthModule } from './modules/auth/auth.module';
     {
       provide: APP_INTERCEPTOR,
       useClass: ClassSerializerInterceptor,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ExceptionInterceptor,
     },
   ],
 })
