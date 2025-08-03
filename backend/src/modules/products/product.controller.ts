@@ -7,6 +7,11 @@ import { UploadedFile, UseInterceptors } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import appConfig from 'src/config/app.config';
 import { handleException } from 'src/common/utils/exception.util';
+import {
+  MSG_ERROR_CREATE,
+  MSG_ERROR_GET,
+  MSG_ERROR_UPDATE,
+} from 'src/common/utils/message.util';
 
 @Controller('products')
 export class ProductController {
@@ -42,7 +47,7 @@ export class ProductController {
         this.fileService.deleteFile(file.path, 'products');
       }
       throw handleException(error, {
-        defaultMessage: 'Failed to create product',
+        defaultMessage: MSG_ERROR_CREATE('product'),
       });
     }
   }
@@ -75,7 +80,7 @@ export class ProductController {
         this.fileService.deleteFile(file.path, 'products');
       }
       throw handleException(error, {
-        defaultMessage: 'Failed to update product',
+        defaultMessage: MSG_ERROR_UPDATE('product'),
       });
     }
   }
@@ -86,7 +91,7 @@ export class ProductController {
       return this.productService.findAll();
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: 'Failed to get product',
+        defaultMessage: MSG_ERROR_GET('products'),
       });
     }
   }
@@ -97,7 +102,7 @@ export class ProductController {
       return this.productService.findOne(+id);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: 'Failed to get product',
+        defaultMessage: MSG_ERROR_GET('product'),
       });
     }
   }
@@ -108,7 +113,7 @@ export class ProductController {
       return this.productService.getStock(+id);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: 'Failed to get product stock',
+        defaultMessage: MSG_ERROR_GET('product stock'),
       });
     }
   }

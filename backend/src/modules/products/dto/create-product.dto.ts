@@ -47,7 +47,7 @@ export class CreateProductDto {
   categoryId: number;
 
   @IsArray()
-  @ArrayMinSize(1, { message: 'Sản phẩm phải có ít nhất 1 nhà cung cấp' })
+  @ArrayMinSize(1, { message: 'Product must have at least 1 supplier' })
   @IsNumber({}, { each: true })
   @Transform(({ value }) =>
     Array.isArray(value) ? value.map((v) => parseInt(v, 10)) : [],

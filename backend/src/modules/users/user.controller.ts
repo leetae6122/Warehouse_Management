@@ -17,6 +17,9 @@ import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import {
   MSG_CREATED_SUCCESSFUL,
+  MSG_ERROR_CREATE,
+  MSG_ERROR_GET,
+  MSG_ERROR_UPDATE,
   MSG_NOT_FOUND,
   MSG_UPDATED_SUCCESSFUL,
   MSG_USER_EXISTS,
@@ -25,6 +28,7 @@ import {
 import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { User } from 'src/common/decorators/user.decorator';
+import { handleException } from 'src/common/utils/exception.util';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('users')
@@ -34,17 +38,23 @@ export class UserController {
 
   @Post()
   async create(@Body() createUserDto: CreateUserDto) {
-    const userExists = await this.userService.findByUsername(
-      createUserDto.username,
-    );
-    if (userExists) {
-      throw new BadRequestException(MSG_USER_EXISTS);
+    try {
+      const userExists = await this.userService.findByUsername(
+        createUserDto.username,
+      );
+      if (userExists) {
+        throw new BadRequestException(MSG_USER_EXISTS);
+      }
+      return {
+        statusCode: 201,
+        message: MSG_CREATED_SUCCESSFUL('User'),
+        data: await this.userService.create(createUserDto),
+      };
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: MSG_ERROR_CREATE('user'),
+      });
     }
-    return {
-      statusCode: 201,
-      message: MSG_CREATED_SUCCESSFUL('User'),
-      data: await this.userService.create(createUserDto),
-    };
   }
 
   @Patch(':id')
@@ -53,41 +63,59 @@ export class UserController {
     @Param('id') id: string,
     @Body() updateUserDto: UpdateUserDto,
   ) {
-    const foundUser = await this.userService.findOne(+id);
-    if (!foundUser) {
-      throw new BadRequestException(MSG_NOT_FOUND('User'));
+    try {
+      const foundUser = await this.userService.findOne(+id);
+      if (!foundUser) {
+        throw new BadRequestException(MSG_NOT_FOUND('User'));
+      }
+      if (foundUser.id !== +userIdReq) {
+        throw new BadRequestException(MSG_USER_NOT_OWNER);
+      }
+      return {
+        statusCode: 200,
+        message: MSG_UPDATED_SUCCESSFUL('User'),
+        data: await this.userService.update(foundUser.id, updateUserDto),
+      };
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: MSG_ERROR_UPDATE('user'),
+      });
     }
-    if (foundUser.id !== +userIdReq) {
-      throw new BadRequestException(MSG_USER_NOT_OWNER);
-    }
-    return {
-      statusCode: 200,
-      message: MSG_UPDATED_SUCCESSFUL('User'),
-      data: await this.userService.update(foundUser.id, updateUserDto),
-    };
   }
 
   @Get()
   @Roles('ADMIN')
   async findAll() {
-    return {
-      statusCode: 200,
-      data: await this.userService.findAll(),
-    };
+    try {
+      return {
+        statusCode: 200,
+        data: await this.userService.findAll(),
+      };
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: MSG_ERROR_GET('users'),
+      });
+    }
   }
 
   @Get(':id')
   async findOne(@User('id') userIdReq: string, @Param('id') id: string) {
-    const foundUser = await this.userService.findOne(+id);
-    if (!foundUser) {
-      throw new BadRequestException(MSG_NOT_FOUND('User'));
+    try {
+      const foundUser = await this.userService.findOne(+id);
+      if (!foundUser) {
+        throw new BadRequestException(MSG_NOT_FOUND('User'));
+      }
+      if (foundUser.id !== +userIdReq) {
+        throw new BadRequestException(MSG_USER_NOT_OWNER);
+      }
+      return {
+        statusCode: 200,
+        data: foundUser,
+      };
+    } catch (error) {
+      throw handleException(error, {
+        defaultMessage: MSG_ERROR_GET('user'),
+      });
     }
-    if (foundUser.id !== +userIdReq) {
-      throw new BadRequestException(MSG_USER_NOT_OWNER);
-    }
-    return {
-      statusCode: 200,
-      data: foundUser,
-    };
   }
 }

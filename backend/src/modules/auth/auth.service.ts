@@ -6,7 +6,7 @@ import {
 import {
   MSG_INVALID_TOKEN,
   MSG_NOT_FOUND,
-  MSG_REFRESH_TOKEN_DOES_NOT_MATCH,
+  MSG_REFRESH_TOKEN_NOT_AVAILABLE,
   MSG_WRONG_LOGIN_INFORMATION,
 } from '../../common/utils/message.util';
 import {
@@ -95,7 +95,7 @@ export class AuthService {
       foundUser.refreshTokenHash || '',
     );
     if (!isMatch) {
-      throw new BadRequestException(MSG_REFRESH_TOKEN_DOES_NOT_MATCH);
+      throw new BadRequestException(MSG_REFRESH_TOKEN_NOT_AVAILABLE);
     }
 
     const payload: IJwtPayload = {

@@ -1,7 +1,7 @@
 //////    Error message    //////
 export const MSG_TOKEN_DOES_NOT_MATCH = 'Token does not match';
 export const MSG_INVALID_TOKEN = 'Invalid token';
-export const MSG_REFRESH_TOKEN_DOES_NOT_MATCH = 'Refresh Token does not match';
+export const MSG_REFRESH_TOKEN_NOT_AVAILABLE = 'Refresh token not available';
 export const MSG_ERROR_CREATE_TOKEN = 'Token generation error';
 export const MSG_EMPTY_HASH_DATA = 'Empty hash data';
 export const MSG_ERROR_HASHING_DATA = 'Error hashing data';
@@ -16,6 +16,9 @@ export const MSG_UPDATED_SUCCESSFUL = (e: string) =>
   `${e} updated successfully`;
 export const MSG_DELETED_SUCCESSFUL = (e: string) =>
   `${e} deleted successfully`;
+export const MSG_ERROR_CREATE = (e: string) => `Failed to create ${e}`;
+export const MSG_ERROR_UPDATE = (e: string) => `Failed to update ${e}`;
+export const MSG_ERROR_GET = (e: string) => `Failed to get ${e}`;
 ////// AUTH API //////
 // Success messages
 export const MSG_LOGIN_SUCCESSFUL = 'Logged in successfully';
@@ -29,6 +32,10 @@ export const MSG_USERNAME_EMPTY =
   'The username cannot be empty. Please enter your username';
 export const MSG_PASSWORD_EMPTY =
   'The password cannot be empty.. Please enter your password';
+export const MSG_ERROR_LOGIN = 'An error occurred while logging in';
+export const MSG_ERROR_LOGOUT = 'An error occurred while logging out';
+export const MSG_ERROR_REFRESH_TOKEN =
+  'An error occurred while refreshing the token';
 ////// USER API //////
 // Success messages
 
@@ -38,3 +45,4 @@ export const MSG_PASSWORD_EMPTY =
 // export const MSG_CURRENT_PASSWORD_INCORRECT = 'Current password incorrect!';
 export const MSG_USER_EXISTS = 'User already exists';
 export const MSG_USER_NOT_OWNER = 'You are not the owner of this user';
+export const MSG_PRODUCT_EXISTS = 'Product already exists';
