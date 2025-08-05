@@ -8,6 +8,7 @@ import {
   UseGuards,
   BadRequestException,
   Patch,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -60,11 +61,11 @@ export class UserController {
   @Patch(':id')
   async update(
     @User('id') userIdReq: string,
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
     try {
-      const foundUser = await this.userService.findOne(+id);
+      const foundUser = await this.userService.findOne(id);
       if (!foundUser) {
         throw new BadRequestException(MSG_NOT_FOUND('User'));
       }
@@ -99,9 +100,12 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@User('id') userIdReq: string, @Param('id') id: string) {
+  async findOne(
+    @User('id') userIdReq: string,
+    @Param('id', ParseIntPipe) id: number,
+  ) {
     try {
-      const foundUser = await this.userService.findOne(+id);
+      const foundUser = await this.userService.findOne(id);
       if (!foundUser) {
         throw new BadRequestException(MSG_NOT_FOUND('User'));
       }

@@ -19,6 +19,8 @@ export const MSG_DELETED_SUCCESSFUL = (e: string) =>
 export const MSG_ERROR_CREATE = (e: string) => `Failed to create ${e}`;
 export const MSG_ERROR_UPDATE = (e: string) => `Failed to update ${e}`;
 export const MSG_ERROR_GET = (e: string) => `Failed to get ${e}`;
+export const MSG_ERROR_DELETE = (e: string) => `Failed to delete ${e}`;
+
 ////// AUTH API //////
 // Success messages
 export const MSG_LOGIN_SUCCESSFUL = 'Logged in successfully';

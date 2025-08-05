@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -39,11 +40,11 @@ export class CategoryController {
   @Patch(':id')
   @Roles('ADMIN', 'MANAGER')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateCategoryDto: CreateCategoryDto,
   ) {
     try {
-      return await this.categoryService.update(+id, updateCategoryDto);
+      return await this.categoryService.update(id, updateCategoryDto);
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_UPDATE('category'),
@@ -63,9 +64,9 @@ export class CategoryController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     try {
-      return this.categoryService.findOne(+id);
+      return this.categoryService.findOne(id);
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_GET('category'),

@@ -41,7 +41,7 @@ export class SupplierService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.supplier.findUnique({
+    const supplier = await this.prisma.supplier.findUnique({
       where: { id },
       include: {
         products: true,
@@ -52,5 +52,9 @@ export class SupplierService {
         },
       },
     });
+    if (!supplier) {
+      throw new NotFoundException(`Receipt item with ID ${id} not found`);
+    }
+    return supplier;
   }
 }

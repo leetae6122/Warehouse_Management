@@ -3,31 +3,31 @@ import { Product, Unit } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export class ProductDto implements Product {
-  @ApiProperty({ example: 1 })
+  @ApiProperty()
   id: number;
 
-  @ApiProperty({ example: 'Sản phẩm A' })
+  @ApiProperty()
   name: string;
 
-  @ApiProperty({ example: 'SKU12345' })
+  @ApiProperty()
   sku: string;
 
-  @ApiProperty({ example: 'Mô tả sản phẩm A', required: false })
+  @ApiProperty()
   description: string;
 
-  @ApiProperty({ example: '100.00', type: String })
+  @ApiProperty()
   price: Decimal;
 
-  @ApiProperty({ enum: Unit, example: Unit.PIECE })
+  @ApiProperty()
   unit: Unit;
 
-  @ApiProperty({ example: 'https://example.com/image.jpg', required: false })
+  @ApiProperty()
   imageUrl: string;
 
   @ApiProperty({ example: 1 })
   categoryId: number;
 
-  @ApiProperty({ type: [Number], example: [1, 2] })
+  @ApiProperty()
   suppliers: number[];
 
   @ApiProperty()

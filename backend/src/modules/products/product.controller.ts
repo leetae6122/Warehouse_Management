@@ -1,5 +1,14 @@
 import { FileService } from './../files/file.service';
-import { Controller, Get, Post, Body, Param, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Patch,
+  UseGuards,
+  ParseIntPipe,
+} from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -12,7 +21,10 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { RolesGuard } from 'src/common/guards/role.guard';
 
+@UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('products')
 export class ProductController {
   constructor(
@@ -63,7 +75,7 @@ export class ProductController {
     ),
   )
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateProductDto: UpdateProductDto,
     @UploadedFile() file?: Express.Multer.File,
   ) {
@@ -74,7 +86,7 @@ export class ProductController {
           file.path.slice(file.path.indexOf('uploads'));
         updateProductDto.imageUrl = imageUrl;
       }
-      return this.productService.update(+id, updateProductDto);
+      return this.productService.update(id, updateProductDto);
     } catch (error: unknown) {
       if (file) {
         this.fileService.deleteFile(file.path, 'products');
@@ -97,9 +109,9 @@ export class ProductController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
+  findOne(@Param('id', ParseIntPipe) id: number) {
     try {
-      return this.productService.findOne(+id);
+      return this.productService.findOne(id);
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_GET('product'),
@@ -108,9 +120,9 @@ export class ProductController {
   }
 
   @Get(':id/stock')
-  getStock(@Param('id') id: string) {
+  getStock(@Param('id', ParseIntPipe) id: number) {
     try {
-      return this.productService.getStock(+id);
+      return this.productService.getStock(id);
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_GET('product stock'),

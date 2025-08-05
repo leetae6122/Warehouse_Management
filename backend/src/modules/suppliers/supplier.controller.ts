@@ -6,6 +6,7 @@ import {
   Param,
   Patch,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { SupplierService } from './supplier.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
@@ -40,11 +41,11 @@ export class SupplierController {
   @Roles('ADMIN', 'MANAGER')
   @Patch(':id')
   async update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateSupplierDto: UpdateSupplierDto,
   ) {
     try {
-      return await this.supplierService.update(+id, updateSupplierDto);
+      return await this.supplierService.update(id, updateSupplierDto);
     } catch (error: unknown) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_UPDATE('supplier'),
@@ -64,9 +65,9 @@ export class SupplierController {
   }
 
   @Get(':id')
-  async findOne(@Param('id') id: string) {
+  async findOne(@Param('id', ParseIntPipe) id: number) {
     try {
-      return await this.supplierService.findOne(+id);
+      return await this.supplierService.findOne(id);
     } catch (error: unknown) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_GET('supplier'),
