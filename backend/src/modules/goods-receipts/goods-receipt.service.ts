@@ -1,19 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateGoodsReceiptDto } from './dto/create-goods-receipt.dto';
+import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
+import { ReceiptItemsService } from '../receipt-items/receipt-item.service';
+import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
+import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
+import { isArray } from 'class-validator';
 
 @Injectable()
 export class GoodsReceiptService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private readonly receiptItemService: ReceiptItemsService,
+  ) {}
 
   async create(userId: number, createGoodsReceiptDto: CreateGoodsReceiptDto) {
     const { supplierId, items } = createGoodsReceiptDto;
 
-    // Tính tổng tiền từ các items
-    const totalAmount = items.reduce(
-      (sum, item) => sum + item.quantity * item.importPrice,
-      0,
-    );
+    const { receiptItems, totalAmount } =
+      await this.getReceiptItemsAndTotalAmount(items);
 
     return await this.prisma.goodsReceipt.create({
       data: {
@@ -21,7 +26,7 @@ export class GoodsReceiptService {
         userId,
         totalAmount,
         items: {
-          create: items.map((item) => ({
+          create: receiptItems.map((item) => ({
             ...item,
             remainingQuantity: item.quantity,
           })),
@@ -66,7 +71,7 @@ export class GoodsReceiptService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.goodsReceipt.findUnique({
+    const goodsReceipt = await this.prisma.goodsReceipt.findUnique({
       where: { id },
       include: {
         items: {
@@ -84,5 +89,90 @@ export class GoodsReceiptService {
         },
       },
     });
+    if (!goodsReceipt) {
+      throw new NotFoundException(MSG_NOT_FOUND('goods receipt'));
+    }
+    return goodsReceipt;
+  }
+
+  async update(id: number, updateGoodsReceiptDto: UpdateGoodsReceiptDto) {
+    await this.findOne(id);
+
+    const { supplierId, items } = updateGoodsReceiptDto;
+    const updateData: UpdateGoodsReceiptDto = {
+      totalAmount: 0,
+      items: [],
+      supplierId: undefined,
+    };
+
+    // Update supplier if provided
+    if (supplierId !== undefined) {
+      updateData.supplierId = supplierId;
+    }
+
+    // Update items if provided
+    if (isArray(items) && items.length > 0) {
+      // Delete existing items
+      await this.prisma.receiptItem.deleteMany({
+        where: { receiptId: id },
+      });
+
+      // Get new receipt items
+      const { receiptItems, totalAmount } =
+        await this.getReceiptItemsAndTotalAmount(items);
+
+      // Update total amount
+      updateData.totalAmount = totalAmount;
+
+      // Create new items
+      await this.prisma.receiptItem.createMany({
+        data: receiptItems.map((item) => ({
+          receiptId: id,
+          productId: item.productId,
+          quantity: item.quantity,
+          importPrice: item.importPrice,
+          remainingQuantity: item.quantity,
+        })),
+      });
+    }
+
+    // Update the goods receipt
+    return await this.prisma.goodsReceipt.update({
+      where: { id },
+      data: {
+        ...(updateData.supplierId !== undefined && {
+          supplierId: updateData.supplierId,
+        }),
+        ...(updateData.totalAmount !== undefined && {
+          totalAmount: updateData.totalAmount,
+        }),
+      },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+        supplier: true,
+        user: {
+          select: {
+            id: true,
+            username: true,
+            fullName: true,
+          },
+        },
+      },
+    });
+  }
+
+  async getReceiptItemsAndTotalAmount(
+    items: number[],
+  ): Promise<{ receiptItems: ReceiptItemDto[]; totalAmount: number }> {
+    const receiptItems = await this.receiptItemService.findByListId(items);
+    const totalAmount = receiptItems.reduce(
+      (sum, item) => sum + item.quantity * +item.importPrice,
+      0,
+    );
+    return { receiptItems, totalAmount };
   }
 }

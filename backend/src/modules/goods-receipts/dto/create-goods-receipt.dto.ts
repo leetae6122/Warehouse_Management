@@ -1,33 +1,15 @@
-import {
-  IsNumber,
-  IsArray,
-  ValidateNested,
-  IsOptional,
-  IsDateString,
-} from 'class-validator';
-import { Type } from 'class-transformer';
-
-export class CreateReceiptItemDto {
-  @IsNumber()
-  productId: number;
-
-  @IsNumber()
-  quantity: number;
-
-  @IsNumber()
-  importPrice: number;
-
-  @IsOptional()
-  @IsDateString()
-  expiryDate?: string;
-}
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsArray, ArrayMinSize, IsNotEmpty } from 'class-validator';
 
 export class CreateGoodsReceiptDto {
+  @IsNotEmpty()
   @IsNumber()
+  @ApiProperty({ example: 1 })
   supplierId: number;
 
   @IsArray()
-  @ValidateNested({ each: true })
-  @Type(() => CreateReceiptItemDto)
-  items: CreateReceiptItemDto[];
+  @ArrayMinSize(1, { message: 'The receipt must contain at least 1 item' })
+  @IsNumber({}, { each: true })
+  @ApiProperty({ type: [Number], example: [1, 2] })
+  items: number[];
 }
