@@ -13,6 +13,7 @@ import appConfig from './config/app.config';
 import { AuthModule } from './modules/auth/auth.module';
 import { FileModule } from './modules/files/file.module';
 import { ExceptionInterceptor } from './common/interceptors/exception.interceptor';
+import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { ExceptionInterceptor } from './common/interceptors/exception.intercepto
     GoodsReceiptModule,
     SaleTransactionModule,
     FileModule,
+    ReceiptItemsModule,
   ],
   controllers: [],
   providers: [
