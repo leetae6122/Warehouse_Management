@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Product, Unit } from '@prisma/client';
+import { Product, ReceiptItem, SaleItem, Supplier, Unit } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export class ProductDto implements Product {
@@ -28,7 +28,13 @@ export class ProductDto implements Product {
   categoryId: number;
 
   @ApiProperty()
-  suppliers: number[];
+  suppliers: Supplier[];
+
+  @ApiProperty()
+  receiptItems: ReceiptItem[];
+
+  @ApiProperty()
+  saleItems: SaleItem[];
 
   @ApiProperty()
   createdAt: Date;

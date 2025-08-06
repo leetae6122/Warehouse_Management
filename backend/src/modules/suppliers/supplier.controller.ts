@@ -20,9 +20,11 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
+import { ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('suppliers')
 @Controller('suppliers')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class SupplierController {
   constructor(private readonly supplierService: SupplierService) {}
 

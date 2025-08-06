@@ -30,9 +30,11 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
 import { User } from 'src/common/decorators/user.decorator';
 import { handleException } from 'src/common/utils/exception.util';
+import { ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('users')
 @Controller('users')
+@UseGuards(JwtAuthGuard, RolesGuard)
 @UseInterceptors(new TransformDtoInterceptor(UserDto))
 export class UserController {
   constructor(private readonly userService: UserService) {}

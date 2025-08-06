@@ -19,9 +19,11 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
+import { ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('categories')
 @Controller('categories')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class CategoryController {
   constructor(private readonly categoryService: CategoryService) {}
 

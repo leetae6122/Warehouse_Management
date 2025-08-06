@@ -23,9 +23,11 @@ import {
 } from 'src/common/utils/message.util';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
+import { ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('products')
 @Controller('products')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductController {
   constructor(
     private readonly productService: ProductService,

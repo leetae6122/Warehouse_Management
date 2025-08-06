@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
+  UseGuards,
 } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { ReceiptItemsService } from './receipt-item.service';
@@ -19,9 +20,12 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
+import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
+import { RolesGuard } from 'src/common/guards/role.guard';
 
 @ApiTags('receipt-items')
 @Controller('receipt-items')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class ReceiptItemsController {
   constructor(private readonly receiptItemsService: ReceiptItemsService) {}
 
