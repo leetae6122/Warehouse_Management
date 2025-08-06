@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { GoodsReceipt } from '@prisma/client';
+import { GoodsReceipt, ReceiptItem } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
 
 export class GoodsReceiptDto implements GoodsReceipt {
@@ -19,5 +19,5 @@ export class GoodsReceiptDto implements GoodsReceipt {
   userId: number;
 
   @ApiProperty()
-  items: number[];
+  items: ReceiptItem[];
 }

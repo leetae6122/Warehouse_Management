@@ -21,12 +21,16 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { IJwtPayload } from '../auth/interfaces/auth.interface';
+import { ApiTags } from '@nestjs/swagger';
 
-@UseGuards(JwtAuthGuard, RolesGuard)
+@ApiTags('goods-receipts')
 @Controller('goods-receipts')
+@UseGuards(JwtAuthGuard, RolesGuard)
 export class GoodsReceiptController {
   constructor(private readonly goodsReceiptService: GoodsReceiptService) {}
 
+  @Roles('MANAGER', 'STAFF')
   @Post()
   async create(
     @Body() createGoodsReceiptDto: CreateGoodsReceiptDto,
@@ -44,6 +48,7 @@ export class GoodsReceiptController {
     }
   }
 
+  @Roles('ADMIN', 'MANAGER')
   @Get()
   findAll() {
     try {
@@ -67,13 +72,17 @@ export class GoodsReceiptController {
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
   async update(
     @Param('id', ParseIntPipe) id: number,
+    @User() user: IJwtPayload,
     @Body() updateGoodsReceiptDto: UpdateGoodsReceiptDto,
   ) {
     try {
-      return await this.goodsReceiptService.update(id, updateGoodsReceiptDto);
+      return await this.goodsReceiptService.update(
+        id,
+        user,
+        updateGoodsReceiptDto,
+      );
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_UPDATE('Goods Receipt'),

@@ -1,11 +1,19 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateGoodsReceiptDto } from './dto/create-goods-receipt.dto';
 import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
 import { ReceiptItemsService } from '../receipt-items/receipt-item.service';
-import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
+import {
+  MSG_NOT_FOUND,
+  MSG_UPDATE_FORBIDDEN_RECEIPT,
+} from 'src/common/utils/message.util';
 import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
 import { isArray } from 'class-validator';
+import { IJwtPayload } from '../auth/interfaces/auth.interface';
 
 interface UpdateGoodsReceiptData {
   totalAmount: number;
@@ -101,8 +109,18 @@ export class GoodsReceiptService {
     return goodsReceipt;
   }
 
-  async update(id: number, updateGoodsReceiptDto: UpdateGoodsReceiptDto) {
-    await this.findOne(id);
+  async update(
+    id: number,
+    user: IJwtPayload,
+    updateGoodsReceiptDto: UpdateGoodsReceiptDto,
+  ) {
+    const existingReceipt = await this.findOne(id);
+    // If it is STAFF, only allow updates if the user is the one who created the sale transaction
+    if (user.role === 'STAFF') {
+      if (existingReceipt.userId !== user.id) {
+        throw new ForbiddenException(MSG_UPDATE_FORBIDDEN_RECEIPT);
+      }
+    }
 
     const { supplierId, items } = updateGoodsReceiptDto;
     const updateData: UpdateGoodsReceiptData = {
