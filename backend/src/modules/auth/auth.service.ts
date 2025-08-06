@@ -20,7 +20,6 @@ import {
   verifyToken,
 } from '../../common/utils/token.util';
 import { UserService } from '../users/user.service';
-import { UserDto } from '../users/dto/user.dto';
 import { Request } from 'express';
 import {
   IJwtPayload,
@@ -69,7 +68,7 @@ export class AuthService {
     };
   }
 
-  async logout(user: UserDto) {
+  async logout(user: IJwtPayload) {
     return (await this.userService.updateRefreshTokenHash(user.id))
       ? true
       : false;

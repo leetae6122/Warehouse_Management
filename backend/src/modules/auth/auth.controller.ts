@@ -5,7 +5,6 @@ import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt.guard';
 import { User } from '../../common/decorators/user.decorator';
-import { UserDto } from '../users/dto/user.dto';
 import {
   MSG_ERROR_LOGIN,
   MSG_ERROR_LOGOUT,
@@ -15,6 +14,7 @@ import {
   MSG_REFRESH_TOKEN_SUCCESSFUL,
 } from 'src/common/utils/message.util';
 import { handleException } from 'src/common/utils/exception.util';
+import { IJwtPayload } from './interfaces/auth.interface';
 
 @Controller('auth')
 @ApiTags('auth')
@@ -38,7 +38,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Post('logout')
-  async logout(@User() user: UserDto) {
+  async logout(@User() user: IJwtPayload) {
     try {
       return (await this.authService.logout(user))
         ? {
