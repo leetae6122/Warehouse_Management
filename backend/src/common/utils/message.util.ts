@@ -48,3 +48,11 @@ export const MSG_ERROR_REFRESH_TOKEN =
 export const MSG_USER_EXISTS = 'User already exists';
 export const MSG_USER_NOT_OWNER = 'You are not the owner of this user';
 export const MSG_PRODUCT_EXISTS = 'Product already exists';
+
+////// GOODS RECEIPT //////
+export const MSG_UPDATE_FORBIDDEN_RECEIPT =
+  'You do not have permission to update this receipt';
+
+////// Sale Transaction //////
+export const MSG_UPDATE_FORBIDDEN_TRANSACTION =
+  'You do not have permission to update this transaction';
