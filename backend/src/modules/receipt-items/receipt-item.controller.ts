@@ -31,7 +31,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.create(createReceiptItemDto);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_CREATE('receipt item'),
+        defaultMessage: MSG_ERROR_CREATE('Receipt Item'),
       });
     }
   }
@@ -42,7 +42,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.findAll();
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_GET('receipt item'),
+        defaultMessage: MSG_ERROR_GET('Receipt Item'),
       });
     }
   }
@@ -53,7 +53,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.findOne(id);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_GET('receipt item'),
+        defaultMessage: MSG_ERROR_GET('Receipt Item'),
       });
     }
   }
@@ -64,7 +64,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.findByReceiptId(receiptId);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_GET('receipt item'),
+        defaultMessage: MSG_ERROR_GET('Receipt Item'),
       });
     }
   }
@@ -75,7 +75,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.findByProductId(productId);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_GET('receipt item'),
+        defaultMessage: MSG_ERROR_GET('Receipt Item'),
       });
     }
   }
@@ -89,7 +89,7 @@ export class ReceiptItemsController {
       return await this.receiptItemsService.update(id, updateReceiptItemDto);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_UPDATE('receipt item'),
+        defaultMessage: MSG_ERROR_UPDATE('Receipt Item'),
       });
     }
   }
@@ -100,7 +100,7 @@ export class ReceiptItemsController {
       await this.receiptItemsService.remove(id);
     } catch (error) {
       throw handleException(error, {
-        defaultMessage: MSG_ERROR_DELETE('receipt item'),
+        defaultMessage: MSG_ERROR_DELETE('Receipt Item'),
       });
     }
   }

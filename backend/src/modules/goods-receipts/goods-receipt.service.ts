@@ -7,11 +7,17 @@ import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
 import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
 import { isArray } from 'class-validator';
 
+interface UpdateGoodsReceiptData {
+  totalAmount: number;
+  items: [];
+  supplierId: number;
+}
+
 @Injectable()
 export class GoodsReceiptService {
   constructor(
     private prisma: PrismaService,
-    private readonly receiptItemService: ReceiptItemsService,
+    private readonly receiptItemsService: ReceiptItemsService,
   ) {}
 
   async create(userId: number, createGoodsReceiptDto: CreateGoodsReceiptDto) {
@@ -90,7 +96,7 @@ export class GoodsReceiptService {
       },
     });
     if (!goodsReceipt) {
-      throw new NotFoundException(MSG_NOT_FOUND('goods receipt'));
+      throw new NotFoundException(MSG_NOT_FOUND('Goods Receipt'));
     }
     return goodsReceipt;
   }
@@ -99,10 +105,10 @@ export class GoodsReceiptService {
     await this.findOne(id);
 
     const { supplierId, items } = updateGoodsReceiptDto;
-    const updateData: UpdateGoodsReceiptDto = {
-      totalAmount: 0,
+    const updateData: UpdateGoodsReceiptData = {
       items: [],
-      supplierId: undefined,
+      supplierId: 0,
+      totalAmount: 0,
     };
 
     // Update supplier if provided
@@ -168,7 +174,7 @@ export class GoodsReceiptService {
   async getReceiptItemsAndTotalAmount(
     items: number[],
   ): Promise<{ receiptItems: ReceiptItemDto[]; totalAmount: number }> {
-    const receiptItems = await this.receiptItemService.findByListId(items);
+    const receiptItems = await this.receiptItemsService.findByListId(items);
     const totalAmount = receiptItems.reduce(
       (sum, item) => sum + item.quantity * +item.importPrice,
       0,

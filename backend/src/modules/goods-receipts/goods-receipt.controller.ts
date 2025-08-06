@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { GoodsReceiptService } from './goods-receipt.service';
 import { CreateGoodsReceiptDto } from './dto/create-goods-receipt.dto';
-import { UserDto } from '../users/dto/user.dto';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import { User } from 'src/common/decorators/user.decorator';
@@ -31,11 +30,11 @@ export class GoodsReceiptController {
   @Post()
   async create(
     @Body() createGoodsReceiptDto: CreateGoodsReceiptDto,
-    @User() user: UserDto,
+    @User('id') userId: number,
   ) {
     try {
       return await this.goodsReceiptService.create(
-        user.id,
+        userId,
         createGoodsReceiptDto,
       );
     } catch (error) {
