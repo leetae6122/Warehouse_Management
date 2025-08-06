@@ -14,6 +14,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { FileModule } from './modules/files/file.module';
 import { ExceptionInterceptor } from './common/interceptors/exception.interceptor';
 import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module';
+import { SaleItemsModule } from './modules/sale-items/sale-item.module';
 
 @Module({
   imports: [
@@ -31,6 +32,7 @@ import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module'
     SaleTransactionModule,
     FileModule,
     ReceiptItemsModule,
+    SaleItemsModule,
   ],
   controllers: [],
   providers: [
