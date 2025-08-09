@@ -1,8 +1,8 @@
 -- CreateEnum
-CREATE TYPE "Role" AS ENUM ('ADMIN', 'STAFF');
+CREATE TYPE "Role" AS ENUM ('ADMIN', 'MANAGER', 'STAFF');
 
 -- CreateEnum
-CREATE TYPE "Unit" AS ENUM ('CAN', 'BOTTLE', 'BOX', 'KG', 'PACK');
+CREATE TYPE "Unit" AS ENUM ('CAN', 'BOTTLE', 'BOX', 'KG', 'PACK', 'PIECE', 'SET', 'CARTON', 'L', 'Roll');
 
 -- CreateTable
 CREATE TABLE "users" (
@@ -13,6 +13,8 @@ CREATE TABLE "users" (
     "role" "Role" NOT NULL DEFAULT 'STAFF',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "isActive" BOOLEAN NOT NULL DEFAULT true,
+    "refreshTokenHash" TEXT,
 
     CONSTRAINT "users_pkey" PRIMARY KEY ("id")
 );
