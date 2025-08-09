@@ -15,6 +15,7 @@ import { FileModule } from './modules/files/file.module';
 import { ExceptionInterceptor } from './common/interceptors/exception.interceptor';
 import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module';
 import { SaleItemsModule } from './modules/sale-items/sale-item.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
@@ -33,6 +34,11 @@ import { SaleItemsModule } from './modules/sale-items/sale-item.module';
     FileModule,
     ReceiptItemsModule,
     SaleItemsModule,
+    CacheModule.register({
+      isGlobal: true,
+      ttl: appConfig().cache.ttl,
+      max: appConfig().cache.max,
+    }),
   ],
   controllers: [],
   providers: [

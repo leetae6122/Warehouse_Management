@@ -13,4 +13,10 @@ export default () => ({
     dest: process.env.UPLOADED_FILES_DESTINATION,
     domain: process.env.BACKEND_DOMAIN + '\\',
   },
+  cache: {
+    ttl: process.env.CACHE_TTL
+      ? parseInt(process.env.CACHE_TTL) * 60000
+      : 5 * 60000,
+    max: process.env.CACHE_MAX ? parseInt(process.env.CACHE_MAX) : 100,
+  },
 });
