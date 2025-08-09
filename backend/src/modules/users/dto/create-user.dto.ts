@@ -54,10 +54,10 @@ export class CreateUserDto {
   @IsEnum(Role)
   @IsOptional()
   @ApiProperty()
-  role: Role = Role.STAFF;
+  role?: Role;
 
   @IsBoolean()
   @IsOptional()
   @ApiProperty()
-  isActive: boolean = true;
+  isActive?: boolean;
 }

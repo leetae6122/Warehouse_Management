@@ -19,4 +19,7 @@ export default () => ({
       : 5 * 60000,
     max: process.env.CACHE_MAX ? parseInt(process.env.CACHE_MAX) : 100,
   },
+  redis: {
+    host: process.env.REDIS_HOST,
+  },
 });

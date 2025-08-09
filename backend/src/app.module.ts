@@ -16,6 +16,7 @@ import { ExceptionInterceptor } from './common/interceptors/exception.intercepto
 import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module';
 import { SaleItemsModule } from './modules/sale-items/sale-item.module';
 import { CacheModule } from '@nestjs/cache-manager';
+import * as redisStore from 'cache-manager-redis-store';
 
 @Module({
   imports: [
@@ -38,6 +39,9 @@ import { CacheModule } from '@nestjs/cache-manager';
       isGlobal: true,
       ttl: appConfig().cache.ttl,
       max: appConfig().cache.max,
+      store: redisStore,
+      host: appConfig().redis.host,
+      port: 6379,
     }),
   ],
   controllers: [],

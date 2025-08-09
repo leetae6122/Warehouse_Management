@@ -38,6 +38,7 @@ export const MSG_ERROR_LOGIN = 'An error occurred while logging in';
 export const MSG_ERROR_LOGOUT = 'An error occurred while logging out';
 export const MSG_ERROR_REFRESH_TOKEN =
   'An error occurred while refreshing the token';
+export const MSG_ERROR_ACCOUNT_DEACTIVATED = 'Account has been deactivated';
 ////// USER API //////
 // Success messages
 

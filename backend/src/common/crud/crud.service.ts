@@ -22,16 +22,13 @@ export class CrudService {
   }
 
   async clearCache(): Promise<void> {
-    const stores = this.cacheManager.stores;
-    if (stores && stores.length > 0) {
-      const store = stores[0];
-      if (store.opts && store['_store']) {
-        const allKeys = [...store['_store'].keys()];
-        const keysToDelete = allKeys
-          .filter((key: string) => key.includes(this.cacheKey))
-          .map((k: string) => k.replace(/^keyv:/, ''));
-        await this.cacheManager.mdel(keysToDelete);
-      }
+    const stores = this.cacheManager.stores[0];
+    if (stores) {
+      const allKeys = [...stores['_store'].keys()];
+      const keysToDelete = allKeys
+        .filter((key: string) => key.includes(this.cacheKey))
+        .map((k: string) => k.replace(/^keyv:/, ''));
+      await this.cacheManager.mdel(keysToDelete);
     }
   }
 
