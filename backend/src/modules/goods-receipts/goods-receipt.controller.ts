@@ -21,8 +21,8 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { IJwtPayload } from '../auth/interfaces/auth.interface';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from '../users/dto/user.dto';
 
 @ApiTags('goods-receipts')
 @Controller('goods-receipts')
@@ -74,7 +74,7 @@ export class GoodsReceiptController {
   @Patch(':id')
   async update(
     @Param('id', ParseIntPipe) id: number,
-    @User() user: IJwtPayload,
+    @User() user: UserDto,
     @Body() updateGoodsReceiptDto: UpdateGoodsReceiptDto,
   ) {
     try {

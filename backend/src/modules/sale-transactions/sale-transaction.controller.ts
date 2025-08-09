@@ -21,8 +21,8 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateSaleTransactionDto } from './dto/update-sale-transaction.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { IJwtPayload } from '../auth/interfaces/auth.interface';
 import { ApiTags } from '@nestjs/swagger';
+import { UserDto } from '../users/dto/user.dto';
 
 @ApiTags('sale-transactions')
 @Controller('sale-transactions')
@@ -78,7 +78,7 @@ export class SaleTransactionController {
   async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateSaleTransactionDto: UpdateSaleTransactionDto,
-    @User() user: IJwtPayload,
+    @User() user: UserDto,
   ) {
     try {
       return this.saleTransactionService.update(

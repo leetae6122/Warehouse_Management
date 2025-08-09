@@ -12,7 +12,7 @@ import {
   MSG_NOT_FOUND,
   MSG_UPDATE_FORBIDDEN_TRANSACTION,
 } from 'src/common/utils/message.util';
-import { IJwtPayload } from '../auth/interfaces/auth.interface';
+import { UserDto } from '../users/dto/user.dto';
 
 @Injectable()
 export class SaleTransactionService {
@@ -153,7 +153,7 @@ export class SaleTransactionService {
 
   async update(
     id: number,
-    user: IJwtPayload,
+    user: UserDto,
     updateSaleTransactionDto: UpdateSaleTransactionDto,
   ) {
     const existingTransaction = await this.findOne(id);

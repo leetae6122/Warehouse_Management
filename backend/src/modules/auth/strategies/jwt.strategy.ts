@@ -1,9 +1,14 @@
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { PassportStrategy } from '@nestjs/passport';
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { UserService } from '../../users/user.service';
 import { IJwtPayload } from '../interfaces/auth.interface';
 import appConfig from 'src/config/app.config';
+import { MSG_ERROR_ACCOUNT_DEACTIVATED } from 'src/common/utils/message.util';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
@@ -21,11 +26,10 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     if (!user) {
       throw new UnauthorizedException('Invalid token or user does not exist');
     }
+    if (!user.isActive) {
+      throw new BadRequestException(MSG_ERROR_ACCOUNT_DEACTIVATED);
+    }
 
-    return {
-      id: user.id,
-      username: user.username,
-      role: user.role,
-    };
+    return user;
   }
 }

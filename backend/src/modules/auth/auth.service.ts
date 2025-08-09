@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import {
+  MSG_ERROR_ACCOUNT_DEACTIVATED,
   MSG_INVALID_TOKEN,
   MSG_NOT_FOUND,
   MSG_REFRESH_TOKEN_NOT_AVAILABLE,
@@ -26,6 +27,7 @@ import {
   ILoginResponse,
   IVerifyJwtPayload,
 } from './interfaces/auth.interface';
+import { UserDto } from '../users/dto/user.dto';
 
 @Injectable()
 export class AuthService {
@@ -36,6 +38,9 @@ export class AuthService {
     const foundUser = await this.userService.findByUsername(username);
     if (!foundUser) {
       throw new BadRequestException(MSG_WRONG_LOGIN_INFORMATION);
+    }
+    if (!foundUser.isActive) {
+      throw new BadRequestException(MSG_ERROR_ACCOUNT_DEACTIVATED);
     }
 
     const isMatch = await compareHashedData(password, foundUser.password);
@@ -68,7 +73,7 @@ export class AuthService {
     };
   }
 
-  async logout(user: IJwtPayload) {
+  async logout(user: UserDto) {
     return (await this.userService.updateRefreshTokenHash(user.id))
       ? true
       : false;
@@ -89,6 +94,10 @@ export class AuthService {
     if (!foundUser) {
       throw new BadRequestException(MSG_NOT_FOUND('User'));
     }
+    if (!foundUser.isActive) {
+      throw new BadRequestException(MSG_ERROR_ACCOUNT_DEACTIVATED);
+    }
+
     const isMatch = isJwtMatchHashed(
       refreshToken,
       foundUser.refreshTokenHash || '',

@@ -6,14 +6,14 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateGoodsReceiptDto } from './dto/create-goods-receipt.dto';
 import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
-import { ReceiptItemsService } from '../receipt-items/receipt-item.service';
+import { ReceiptItemService } from '../receipt-items/receipt-item.service';
 import {
   MSG_NOT_FOUND,
   MSG_UPDATE_FORBIDDEN_RECEIPT,
 } from 'src/common/utils/message.util';
 import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
 import { isArray } from 'class-validator';
-import { IJwtPayload } from '../auth/interfaces/auth.interface';
+import { UserDto } from '../users/dto/user.dto';
 
 interface UpdateGoodsReceiptData {
   totalAmount: number;
@@ -25,7 +25,7 @@ interface UpdateGoodsReceiptData {
 export class GoodsReceiptService {
   constructor(
     private prisma: PrismaService,
-    private readonly receiptItemsService: ReceiptItemsService,
+    private readonly receiptItemService: ReceiptItemService,
   ) {}
 
   async create(userId: number, createGoodsReceiptDto: CreateGoodsReceiptDto) {
@@ -111,7 +111,7 @@ export class GoodsReceiptService {
 
   async update(
     id: number,
-    user: IJwtPayload,
+    user: UserDto,
     updateGoodsReceiptDto: UpdateGoodsReceiptDto,
   ) {
     const existingReceipt = await this.findOne(id);
@@ -192,7 +192,7 @@ export class GoodsReceiptService {
   async getReceiptItemsAndTotalAmount(
     items: number[],
   ): Promise<{ receiptItems: ReceiptItemDto[]; totalAmount: number }> {
-    const receiptItems = await this.receiptItemsService.findByListId(items);
+    const receiptItems = await this.receiptItemService.findByListId(items);
     const totalAmount = receiptItems.reduce(
       (sum, item) => sum + item.quantity * +item.importPrice,
       0,
