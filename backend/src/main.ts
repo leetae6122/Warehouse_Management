@@ -15,15 +15,17 @@ async function bootstrap() {
 
   app.enableCors({
     credentials: true,
-    origin: process.env.FRONTEND_URL,
+    origin: process.env.FRONTEND_URL?.split(',') || '*',
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
   });
 
   const config = new DocumentBuilder()
     .setTitle('Warehouse Management - CRUD')
-    .setDescription('NestJS - Prisma - Postgresql')
+    .setDescription('NestJS - Prisma - PostgreSQL')
     .setVersion('1.0')
+    .addServer(`http://localhost:${process.env.PORT ?? 3000}`)
     .build();
+
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
 
@@ -32,6 +34,6 @@ async function bootstrap() {
       whitelist: true,
     }),
   );
-  await app.listen(process.env.PORT ?? 3000);
+  await app.listen(process.env.PORT ?? 3000, '0.0.0.0');
 }
 bootstrap();

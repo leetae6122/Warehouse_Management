@@ -1,0 +1,67 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: warehouse-management-app
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    env_file:
+      - .env
+    environment:
+      - PORT=${PORT}
+      - NODE_ENV=production
+    depends_on:
+      - db
+      - redis
+    command: npm run start:dev
+    networks:
+      - warehouse-management-net
+    volumes:
+      - .:/usr/src/app
+  db:
+    image: postgres:16
+    container_name: warehouse-management-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_DB: ${DB_DATABASE}
+    ports:
+      - "${DB_PORT}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - warehouse-management-net
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    container_name: warehouse-management-pgadmin
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
+    ports:
+      - "${PGADMIN_HOST_PORT}:${PGADMIN_CONTAINER_PORT}"
+    depends_on:
+      - db
+    networks:
+      - warehouse-management-net
+
+  redis:
+    image: redis:alpine
+    container_name: warehouse-management-redis
+    restart: always
+    ports:
+      - "${REDIS_PORT}:${REDIS_PORT}"
+    networks:
+      - warehouse-management-net
+    volumes:
+      - redisdata:/data     
+networks:
+  warehouse-management-net:
+    driver: bridge
+volumes:
+  pgdata:
+  redisdata:
