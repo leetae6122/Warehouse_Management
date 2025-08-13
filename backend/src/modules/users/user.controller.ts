@@ -40,6 +40,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
+  @Roles('ADMIN')
   async create(@Body() createUserDto: CreateUserDto) {
     try {
       const userExists = await this.userService.findByUsername(
@@ -62,7 +63,7 @@ export class UserController {
 
   @Patch(':id')
   async update(
-    @User('id') userIdReq: string,
+    @User() user: UserDto,
     @Param('id', ParseIntPipe) id: number,
     @Body() updateUserDto: UpdateUserDto,
   ) {
@@ -71,7 +72,7 @@ export class UserController {
       if (!foundUser) {
         throw new BadRequestException(MSG_NOT_FOUND('User'));
       }
-      if (foundUser.id !== +userIdReq) {
+      if (foundUser.id !== +user.id && user.role === 'STAFF') {
         throw new BadRequestException(MSG_USER_NOT_OWNER);
       }
       return {
@@ -102,18 +103,16 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(
-    @User('id') userIdReq: string,
-    @Param('id', ParseIntPipe) id: number,
-  ) {
+  async findOne(@User() user: UserDto, @Param('id', ParseIntPipe) id: number) {
     try {
       const foundUser = await this.userService.findOne(id);
       if (!foundUser) {
         throw new BadRequestException(MSG_NOT_FOUND('User'));
       }
-      if (foundUser.id !== +userIdReq) {
+      if (foundUser.id !== +user.id && user.role === 'STAFF') {
         throw new BadRequestException(MSG_USER_NOT_OWNER);
       }
+
       return {
         statusCode: 200,
         data: foundUser,
