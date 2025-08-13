@@ -5,7 +5,7 @@
 
 import { generateKey } from './cache.helper';
 import { Injectable } from '@nestjs/common';
-import { FilterCrudDto } from './dto/filter-crud.dto';
+import { FilterCrudDto } from './filter/filter-crud.dto';
 import { Cache } from 'cache-manager';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -57,8 +57,8 @@ export class CrudService {
       orderBy,
     });
 
-    const nextPage = page + 1 > Math.ceil(total / size) ? null : page + 1;
-    const prevPage = page - 1 < 1 ? null : page - 1;
+    const nextPage = page + 1 > Math.ceil(total / size) ? undefined : page + 1;
+    const prevPage = page - 1 < 1 ? undefined : page - 1;
 
     const result = {
       total,
@@ -134,6 +134,14 @@ export class CrudService {
   async deleteData(id: number): Promise<void> {
     await this.module.delete({
       where: { id },
+    });
+
+    await this.clearCache();
+  }
+
+  async deleteManyData(where: any): Promise<void> {
+    await this.module.deleteMany({
+      where,
     });
 
     await this.clearCache();
