@@ -1,5 +1,6 @@
 import {
   ForbiddenException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -14,6 +15,11 @@ import {
 import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
 import { isArray } from 'class-validator';
 import { UserDto } from '../users/dto/user.dto';
+import { GOODS_RECEIPT_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CrudService } from 'src/common/crud/crud.service';
+import { GoodsReceiptDto } from './dto/goods-receipt.dto';
+import { Cache } from 'cache-manager';
 
 interface UpdateGoodsReceiptData {
   totalAmount: number;
@@ -22,11 +28,14 @@ interface UpdateGoodsReceiptData {
 }
 
 @Injectable()
-export class GoodsReceiptService {
+export class GoodsReceiptService extends CrudService {
   constructor(
-    private prisma: PrismaService,
+    protected readonly prisma: PrismaService,
     private readonly receiptItemService: ReceiptItemService,
-  ) {}
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+  ) {
+    super(cacheManager, prisma, GOODS_RECEIPT_CACHE_KEY);
+  }
 
   async create(userId: number, createGoodsReceiptDto: CreateGoodsReceiptDto) {
     const { supplierId, items } = createGoodsReceiptDto;
@@ -34,7 +43,7 @@ export class GoodsReceiptService {
     const { receiptItems, totalAmount } =
       await this.getReceiptItemsAndTotalAmount(items);
 
-    return await this.prisma.goodsReceipt.create({
+    const args = {
       data: {
         supplierId,
         userId,
@@ -61,12 +70,14 @@ export class GoodsReceiptService {
           },
         },
       },
-    });
+    };
+    return (await this.createData(args)) as GoodsReceiptDto;
   }
 
   async findAll() {
-    return await this.prisma.goodsReceipt.findMany({
-      include: {
+    return (await this.getManyData(
+      {},
+      {
         items: {
           include: {
             product: true,
@@ -81,13 +92,13 @@ export class GoodsReceiptService {
           },
         },
       },
-    });
+    )) as GoodsReceiptDto[];
   }
 
   async findOne(id: number) {
-    const goodsReceipt = await this.prisma.goodsReceipt.findUnique({
-      where: { id },
-      include: {
+    const goodsReceipt = (await this.getDataByUnique(
+      { id },
+      {
         items: {
           include: {
             product: true,
@@ -102,7 +113,7 @@ export class GoodsReceiptService {
           },
         },
       },
-    });
+    )) as GoodsReceiptDto;
     if (!goodsReceipt) {
       throw new NotFoundException(MSG_NOT_FOUND('Goods Receipt'));
     }
@@ -137,9 +148,7 @@ export class GoodsReceiptService {
     // Update items if provided
     if (isArray(items) && items.length > 0) {
       // Delete existing items
-      await this.prisma.receiptItem.deleteMany({
-        where: { receiptId: id },
-      });
+      await this.receiptItemService.deleteManyByGoodsReceiptId(id);
 
       // Get new receipt items
       const { receiptItems, totalAmount } =
@@ -149,19 +158,19 @@ export class GoodsReceiptService {
       updateData.totalAmount = totalAmount;
 
       // Create new items
-      await this.prisma.receiptItem.createMany({
-        data: receiptItems.map((item) => ({
-          receiptId: id,
-          productId: item.productId,
-          quantity: item.quantity,
-          importPrice: item.importPrice,
-          remainingQuantity: item.quantity,
-        })),
-      });
+      await Promise.all(
+        receiptItems.map((item) =>
+          this.receiptItemService.create({
+            ...item,
+            receiptId: id,
+            expiryDate: item.expiryDate === null ? undefined : item.expiryDate,
+          }),
+        ),
+      );
     }
 
     // Update the goods receipt
-    return await this.prisma.goodsReceipt.update({
+    return (await this.updateData({
       where: { id },
       data: {
         ...(updateData.supplierId !== undefined && {
@@ -171,22 +180,7 @@ export class GoodsReceiptService {
           totalAmount: updateData.totalAmount,
         }),
       },
-      include: {
-        items: {
-          include: {
-            product: true,
-          },
-        },
-        supplier: true,
-        user: {
-          select: {
-            id: true,
-            username: true,
-            fullName: true,
-          },
-        },
-      },
-    });
+    })) as GoodsReceiptDto;
   }
 
   async getReceiptItemsAndTotalAmount(
