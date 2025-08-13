@@ -2,6 +2,7 @@ import {
   Injectable,
   BadRequestException,
   ForbiddenException,
+  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSaleTransactionDto } from './dto/create-sale-transaction.dto';
@@ -13,13 +14,20 @@ import {
   MSG_UPDATE_FORBIDDEN_TRANSACTION,
 } from 'src/common/utils/message.util';
 import { UserDto } from '../users/dto/user.dto';
+import { CrudService } from 'src/common/crud/crud.service';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Cache } from 'cache-manager';
+import { SALE_TRANSACTION_CACHE_KEY } from 'src/common/crud/cache.constant';
 
 @Injectable()
-export class SaleTransactionService {
+export class SaleTransactionService extends CrudService {
   constructor(
-    private prisma: PrismaService,
+    protected readonly prisma: PrismaService,
     private readonly saleItemsService: SaleItemsService,
-  ) {}
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+  ) {
+    super(cacheManager, prisma, SALE_TRANSACTION_CACHE_KEY);
+  }
 
   async create(
     userId: number,
