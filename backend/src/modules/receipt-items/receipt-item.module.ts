@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { ReceiptItemsController } from './receipt-item.controller';
-import { ReceiptItemsService } from './receipt-item.service';
+import { ReceiptItemController } from './receipt-item.controller';
+import { ReceiptItemService } from './receipt-item.service';
 
 @Module({
-  controllers: [ReceiptItemsController],
-  providers: [ReceiptItemsService],
-  exports: [ReceiptItemsService],
+  controllers: [ReceiptItemController],
+  providers: [ReceiptItemService],
+  exports: [ReceiptItemService],
 })
 export class ReceiptItemsModule {}
