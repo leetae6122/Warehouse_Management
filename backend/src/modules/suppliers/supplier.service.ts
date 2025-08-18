@@ -55,11 +55,7 @@ export class SupplierService extends CrudService {
       {},
       {
         products: true,
-        goodsReceipts: {
-          include: {
-            items: true,
-          },
-        },
+        goodsReceipts: true,
       },
     )) as SupplierDto[];
   }
