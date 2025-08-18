@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -11,25 +12,35 @@ import {
   MSG_PRODUCT_EXISTS,
 } from 'src/common/utils/message.util';
 import { FileService } from '../files/file.service';
+import { CrudService } from 'src/common/crud/crud.service';
+import { PRODUCT_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { Cache } from 'cache-manager';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { ProductDto } from './dto/product.dto';
+import { SupplierService } from '../suppliers/supplier.service';
 
 @Injectable()
-export class ProductService {
+export class ProductService extends CrudService {
   constructor(
-    private prisma: PrismaService,
     private fileService: FileService,
-  ) {}
+    private supplierService: SupplierService,
+    protected readonly prisma: PrismaService,
+    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+  ) {
+    super(cacheManager, prisma, PRODUCT_CACHE_KEY);
+  }
 
   async create(createProductDto: CreateProductDto) {
     const { suppliers, ...productData } = createProductDto;
-    const productExist = await this.prisma.product.findUnique({
-      where: { sku: productData.sku },
-    });
+    const productExist = (await this.getDataByUnique({
+      sku: productData.sku,
+    })) as ProductDto;
     if (productExist) {
       throw new BadRequestException(MSG_PRODUCT_EXISTS);
     }
     await this.checkSuppliersExist(suppliers);
 
-    return this.prisma.product.create({
+    const args = {
       data: {
         ...productData,
         suppliers: {
@@ -40,19 +51,14 @@ export class ProductService {
         category: true,
         suppliers: true,
       },
-    });
+    };
+    return (await this.createData(args)) as ProductDto;
   }
 
   async update(id: number, updateProductDto: UpdateProductDto) {
     const { suppliers, ...productData } = updateProductDto;
 
-    const product = await this.prisma.product.findUnique({
-      where: { id },
-    });
-
-    if (!product) {
-      throw new NotFoundException(MSG_NOT_FOUND('Product'));
-    }
+    const product = await this.findOne(id);
 
     if (suppliers) {
       await this.checkSuppliersExist(suppliers);
@@ -62,7 +68,7 @@ export class ProductService {
       this.fileService.deleteFile(product.imageUrl);
     }
 
-    return await this.prisma.product.update({
+    const args = {
       where: { id },
       data: {
         ...productData,
@@ -76,12 +82,14 @@ export class ProductService {
         category: true,
         suppliers: true,
       },
-    });
+    };
+    return (await this.updateData(args)) as ProductDto;
   }
 
   async findAll() {
-    return await this.prisma.product.findMany({
-      include: {
+    return (await this.getManyData(
+      {},
+      {
         category: true,
         suppliers: true,
         receiptItems: {
@@ -91,13 +99,13 @@ export class ProductService {
           },
         },
       },
-    });
+    )) as ProductDto[];
   }
 
   async findOne(id: number) {
-    return await this.prisma.product.findUnique({
-      where: { id },
-      include: {
+    const product = (await this.getDataByUnique(
+      { id },
+      {
         category: true,
         suppliers: true,
         receiptItems: {
@@ -107,43 +115,17 @@ export class ProductService {
           },
         },
       },
-    });
+    )) as ProductDto;
+    if (!product) {
+      throw new NotFoundException(MSG_NOT_FOUND('Product'));
+    }
+    return product;
   }
 
-  async getStock(id: number) {
-    const receiptItems = await this.prisma.receiptItem.findMany({
-      where: {
-        productId: id,
-        remainingQuantity: {
-          gt: 0,
-        },
-      },
-      orderBy: {
-        expiryDate: 'asc',
-      },
-    });
+  async checkSuppliersExist(supplierIds: number[]) {
+    const suppliersExist = await this.supplierService.findByListId(supplierIds);
 
-    const totalStock = receiptItems.reduce(
-      (sum, item) => sum + item.remainingQuantity,
-      0,
-    );
-
-    return {
-      totalStock,
-      items: receiptItems,
-    };
-  }
-
-  async checkSuppliersExist(suppliers: number[]) {
-    const suppliersExist = await this.prisma.supplier.findMany({
-      where: {
-        id: {
-          in: suppliers,
-        },
-      },
-    });
-
-    if (suppliersExist.length !== suppliers.length) {
+    if (suppliersExist.length !== supplierIds.length) {
       throw new NotFoundException('One or more suppliers do not exist');
     }
   }

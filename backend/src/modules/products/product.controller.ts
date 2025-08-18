@@ -24,6 +24,7 @@ import {
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
 import { ApiTags } from '@nestjs/swagger';
+import { ReceiptItemService } from '../receipt-items/receipt-item.service';
 
 @ApiTags('products')
 @Controller('products')
@@ -31,6 +32,7 @@ import { ApiTags } from '@nestjs/swagger';
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
+    private readonly receiptItemService: ReceiptItemService,
     private readonly fileService: FileService,
   ) {}
 
@@ -124,7 +126,7 @@ export class ProductController {
   @Get(':id/stock')
   getStock(@Param('id', ParseIntPipe) id: number) {
     try {
-      return this.productService.getStock(id);
+      return this.receiptItemService.getStock(id);
     } catch (error) {
       throw handleException(error, {
         defaultMessage: MSG_ERROR_GET('product stock'),
