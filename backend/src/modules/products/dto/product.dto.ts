@@ -1,6 +1,10 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Product, ReceiptItem, SaleItem, Supplier, Unit } from '@prisma/client';
+import { Product, Unit } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { Type } from 'class-transformer';
+import { ReceiptItemDto } from 'src/modules/receipt-items/dto/receipt-item.dto';
+import { SaleItemDto } from 'src/modules/sale-items/dto/sale-item.dto';
+import { SupplierDto } from 'src/modules/suppliers/dto/supplier.dto';
 
 export class ProductDto implements Product {
   @ApiProperty()
@@ -28,17 +32,20 @@ export class ProductDto implements Product {
   categoryId: number;
 
   @ApiProperty()
-  suppliers: Supplier[];
-
-  @ApiProperty()
-  receiptItems: ReceiptItem[];
-
-  @ApiProperty()
-  saleItems: SaleItem[];
-
-  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty({ isArray: true, type: SupplierDto })
+  @Type(() => SupplierDto)
+  suppliers?: SupplierDto[];
+
+  @ApiProperty({ isArray: true, type: ReceiptItemDto })
+  @Type(() => ReceiptItemDto)
+  receiptItems?: ReceiptItemDto[];
+
+  @ApiProperty({ isArray: true, type: SaleItemDto })
+  @Type(() => SaleItemDto)
+  saleItems?: SaleItemDto[];
 }

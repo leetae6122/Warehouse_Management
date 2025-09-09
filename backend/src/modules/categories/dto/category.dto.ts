@@ -1,5 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Category, Product } from '@prisma/client';
+import { Category } from '@prisma/client';
+import { Type } from 'class-transformer';
+import { ProductDto } from 'src/modules/products/dto/product.dto';
 
 export class CategoryDto implements Category {
   @ApiProperty()
@@ -9,11 +11,12 @@ export class CategoryDto implements Category {
   name: string;
 
   @ApiProperty()
-  products: Product[];
-
-  @ApiProperty()
   createdAt: Date;
 
   @ApiProperty()
   updatedAt: Date;
+
+  @ApiProperty({ isArray: true, type: ProductDto })
+  @Type(() => ProductDto)
+  products?: ProductDto[];
 }

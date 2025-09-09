@@ -1,6 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { SaleItem, SaleTransaction } from '@prisma/client';
+import { SaleTransaction } from '@prisma/client';
 import { Decimal } from '@prisma/client/runtime/library';
+import { Type } from 'class-transformer';
+import { UserDto } from 'src/modules/users/dto/user.dto';
+import { SaleItemDto } from 'src/modules/sale-items/dto/sale-item.dto';
 
 export class SaleTransactionDto implements SaleTransaction {
   @ApiProperty()
@@ -15,6 +18,11 @@ export class SaleTransactionDto implements SaleTransaction {
   @ApiProperty()
   userId: number;
 
-  @ApiProperty()
-  items: SaleItem[];
+  @ApiProperty({ isArray: true, type: SaleItemDto })
+  @Type(() => SaleItemDto)
+  items?: SaleItemDto[];
+
+  @ApiProperty({ type: UserDto })
+  @Type(() => UserDto)
+  user?: UserDto;
 }
