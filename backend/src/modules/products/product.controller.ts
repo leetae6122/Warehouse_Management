@@ -23,10 +23,11 @@ import {
 } from 'src/common/utils/message.util';
 import { JwtAuthGuard } from 'src/common/guards/jwt.guard';
 import { RolesGuard } from 'src/common/guards/role.guard';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReceiptItemService } from '../receipt-items/receipt-item.service';
 
 @ApiTags('products')
+@ApiBearerAuth('access-token')
 @Controller('products')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ProductController {

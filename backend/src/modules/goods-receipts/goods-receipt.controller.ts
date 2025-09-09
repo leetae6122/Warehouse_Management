@@ -21,10 +21,11 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateGoodsReceiptDto } from './dto/update-goods-receipt.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserDto } from '../users/dto/user.dto';
 
 @ApiTags('goods-receipts')
+@ApiBearerAuth('access-token')
 @Controller('goods-receipts')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class GoodsReceiptController {

@@ -19,9 +19,10 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('categories')
+@ApiBearerAuth('access-token')
 @Controller('categories')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class CategoryController {

@@ -23,6 +23,28 @@ async function bootstrap() {
     .setTitle('Warehouse Management - CRUD')
     .setDescription('NestJS - Prisma - PostgreSQL')
     .setVersion('1.0')
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Enter JWT token in the format: Bearer <token>',
+      },
+      'access-token',
+    )
+    .addBearerAuth(
+      {
+        type: 'http',
+        scheme: 'bearer',
+        bearerFormat: 'JWT',
+        in: 'header',
+        name: 'Authorization',
+        description: 'Enter JWT token in the format: Bearer <token>',
+      },
+      'refresh-token',
+    )
     .addServer(`http://localhost:${process.env.PORT ?? 3000}`)
     .build();
 

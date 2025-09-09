@@ -21,10 +21,11 @@ import {
 } from 'src/common/utils/message.util';
 import { UpdateSaleTransactionDto } from './dto/update-sale-transaction.dto';
 import { Roles } from 'src/common/decorators/roles.decorator';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { UserDto } from '../users/dto/user.dto';
 
 @ApiTags('sale-transactions')
+@ApiBearerAuth('access-token')
 @Controller('sale-transactions')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SaleTransactionController {

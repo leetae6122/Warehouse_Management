@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
 import { Request } from 'express';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginAuthDto } from './dto/login-auth.dto';
 import { JwtAuthGuard } from '../../common/guards/jwt.guard';
@@ -36,6 +36,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('access-token')
   @UseGuards(JwtAuthGuard)
   @Post('logout')
   async logout(@User() user: UserDto) {
@@ -56,6 +57,7 @@ export class AuthController {
     }
   }
 
+  @ApiBearerAuth('refresh-token')
   @Post('refresh')
   async refreshTokens(@Req() req: Request) {
     try {

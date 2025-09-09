@@ -21,9 +21,10 @@ import {
   MSG_ERROR_GET,
   MSG_ERROR_UPDATE,
 } from 'src/common/utils/message.util';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('sale-items')
+@ApiBearerAuth('access-token')
 @Controller('sale-items')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class SaleItemsController {

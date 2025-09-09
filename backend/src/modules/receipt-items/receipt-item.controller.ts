@@ -9,7 +9,7 @@ import {
   ParseIntPipe,
   UseGuards,
 } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 import { ReceiptItemService } from './receipt-item.service';
 import { CreateReceiptItemDto } from './dto/create-receipt-item.dto';
 import { UpdateReceiptItemDto } from './dto/update-receipt-item.dto';
@@ -26,6 +26,7 @@ import { RolesGuard } from 'src/common/guards/role.guard';
 import { FilterCrudDto } from 'src/common/crud/filter/filter-crud.dto';
 
 @ApiTags('receipt-items')
+@ApiBearerAuth('access-token')
 @Controller('receipt-items')
 @UseGuards(JwtAuthGuard, RolesGuard)
 export class ReceiptItemController {
