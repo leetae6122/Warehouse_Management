@@ -119,8 +119,8 @@ model ReceiptItem {
   importPrice       Decimal   @db.Decimal(12, 2)
   expiryDate        DateTime?
 
-  receipt   GoodsReceipt @relation(fields: [receiptId], references: [id], onDelete: Cascade)
-  receiptId Int
+  goodsReceipt   GoodsReceipt @relation(fields: [goodsReceiptId], references: [id], onDelete: Cascade)
+  goodsReceiptId Int
 
   product   Product @relation(fields: [productId], references: [id])
   productId Int
@@ -147,8 +147,8 @@ model SaleItem {
   quantity    Int
   priceAtSale Decimal @db.Decimal(12, 2)
 
-  transaction   SaleTransaction @relation(fields: [transactionId], references: [id], onDelete: Cascade)
-  transactionId Int
+  saleTransaction   SaleTransaction @relation(fields: [saleTransactionId], references: [id], onDelete: Cascade)
+  saleTransactionId Int
 
   product   Product @relation(fields: [productId], references: [id])
   productId Int
