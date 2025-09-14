@@ -15,8 +15,8 @@ import { FileModule } from './modules/files/file.module';
 import { ExceptionInterceptor } from './common/interceptors/exception.interceptor';
 import { ReceiptItemsModule } from './modules/receipt-items/receipt-item.module';
 import { SaleItemsModule } from './modules/sale-items/sale-item.module';
-import { CacheModule } from '@nestjs/cache-manager';
-import * as redisStore from 'cache-manager-redis-store';
+import { CacheService } from './modules/cache/cache.service';
+import { CacheModule } from './modules/cache/cache.module';
 
 @Module({
   imports: [
@@ -35,17 +35,11 @@ import * as redisStore from 'cache-manager-redis-store';
     FileModule,
     ReceiptItemsModule,
     SaleItemsModule,
-    CacheModule.register({
-      isGlobal: true,
-      ttl: appConfig().cache.ttl,
-      max: appConfig().cache.max,
-      store: redisStore,
-      host: appConfig().redis.host,
-      port: 6379,
-    }),
+    CacheModule,
   ],
   controllers: [],
   providers: [
+    CacheService,
     {
       provide: APP_FILTER,
       useClass: PrismaClientExceptionFilter,

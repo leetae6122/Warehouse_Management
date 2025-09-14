@@ -18,8 +18,7 @@ export default () => ({
       ? parseInt(process.env.CACHE_TTL) * 60000
       : 5 * 60000,
     max: process.env.CACHE_MAX ? parseInt(process.env.CACHE_MAX) : 100,
-  },
-  redis: {
-    host: process.env.REDIS_HOST,
+    uuid_namespace: process.env.UUID_NAMESPACE,
+    redisUrl: process.env.REDIS_URL,
   },
 });
