@@ -1,6 +1,5 @@
 import {
   ForbiddenException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -15,11 +14,10 @@ import {
 import { ReceiptItemDto } from '../receipt-items/dto/receipt-item.dto';
 import { isArray } from 'class-validator';
 import { UserDto } from '../users/dto/user.dto';
-import { GOODS_RECEIPT_CACHE_KEY } from 'src/common/crud/cache.constant';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { CrudService } from 'src/common/crud/crud.service';
+import { GOODS_RECEIPT_CACHE_KEY } from 'src/modules/cache/cache.constant';
+import { CrudService } from 'src/modules/crud/crud.service';
 import { GoodsReceiptDto } from './dto/goods-receipt.dto';
-import { Cache } from 'cache-manager';
+import { CacheService } from '../cache/cache.service';
 
 interface UpdateGoodsReceiptData {
   totalAmount: number;
@@ -32,9 +30,9 @@ export class GoodsReceiptService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
     private readonly receiptItemService: ReceiptItemService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, GOODS_RECEIPT_CACHE_KEY);
+    super(cacheService, prisma, GOODS_RECEIPT_CACHE_KEY);
   }
 
   async create(userId: number, createGoodsReceiptDto: CreateGoodsReceiptDto) {

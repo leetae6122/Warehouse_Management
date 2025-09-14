@@ -2,7 +2,6 @@ import {
   Injectable,
   BadRequestException,
   ForbiddenException,
-  Inject,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSaleTransactionDto } from './dto/create-sale-transaction.dto';
@@ -14,19 +13,18 @@ import {
   MSG_UPDATE_FORBIDDEN_TRANSACTION,
 } from 'src/common/utils/message.util';
 import { UserDto } from '../users/dto/user.dto';
-import { CrudService } from 'src/common/crud/crud.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { SALE_TRANSACTION_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { SALE_TRANSACTION_CACHE_KEY } from 'src/modules/cache/cache.constant';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class SaleTransactionService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
     private readonly saleItemsService: SaleItemsService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, SALE_TRANSACTION_CACHE_KEY);
+    super(cacheService, prisma, SALE_TRANSACTION_CACHE_KEY);
   }
 
   async create(
@@ -195,7 +193,7 @@ export class SaleTransactionService extends CrudService {
       // Delete old sale items
       await this.prisma.saleItem.deleteMany({
         where: {
-          transactionId: id,
+          saleTransactionId: id,
         },
       });
 

@@ -1,22 +1,21 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateReceiptItemDto } from './dto/create-receipt-item.dto';
 import { UpdateReceiptItemDto } from './dto/update-receipt-item.dto';
 import { ReceiptItemDto } from './dto/receipt-item.dto';
-import { CrudService } from 'src/common/crud/crud.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { RECEIPT_ITEM_CACHE_KEY } from 'src/common/crud/cache.constant';
-import { FilterCrudDto } from 'src/common/crud/filter/filter-crud.dto';
-import { ResponseFilter } from 'src/common/crud/filter/filter.interface';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { RECEIPT_ITEM_CACHE_KEY } from 'src/modules/cache/cache.constant';
+import { FilterCrudDto } from 'src/modules/crud/filter/filter-crud.dto';
+import { ResponseFilter } from 'src/modules/crud/filter/filter.interface';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class ReceiptItemService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, RECEIPT_ITEM_CACHE_KEY);
+    super(cacheService, prisma, RECEIPT_ITEM_CACHE_KEY);
   }
 
   async create(
@@ -25,7 +24,7 @@ export class ReceiptItemService extends CrudService {
     const args = {
       data: createReceiptItemDto,
       include: {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     };
@@ -36,7 +35,7 @@ export class ReceiptItemService extends CrudService {
     return (await this.getManyData(
       {},
       {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     )) as ReceiptItemDto[];
@@ -46,7 +45,7 @@ export class ReceiptItemService extends CrudService {
     const receiptItem = (await this.getDataByUnique(
       { id },
       {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     )) as ReceiptItemDto;
@@ -68,7 +67,7 @@ export class ReceiptItemService extends CrudService {
       where: { id },
       data: updateReceiptItemDto,
       include: {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     };
@@ -86,7 +85,7 @@ export class ReceiptItemService extends CrudService {
     return (await this.getManyData(
       { receiptId },
       {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     )) as ReceiptItemDto[];
@@ -96,7 +95,7 @@ export class ReceiptItemService extends CrudService {
     return (await this.getManyData(
       { productId },
       {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     )) as ReceiptItemDto[];
@@ -110,7 +109,7 @@ export class ReceiptItemService extends CrudService {
         },
       },
       {
-        receipt: true,
+        goodsReceipt: true,
         product: true,
       },
     )) as ReceiptItemDto[];

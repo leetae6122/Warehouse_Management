@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -12,12 +11,11 @@ import {
   MSG_PRODUCT_EXISTS,
 } from 'src/common/utils/message.util';
 import { FileService } from '../files/file.service';
-import { CrudService } from 'src/common/crud/crud.service';
-import { PRODUCT_CACHE_KEY } from 'src/common/crud/cache.constant';
-import { Cache } from 'cache-manager';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { PRODUCT_CACHE_KEY } from 'src/modules/cache/cache.constant';
 import { ProductDto } from './dto/product.dto';
 import { SupplierService } from '../suppliers/supplier.service';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class ProductService extends CrudService {
@@ -25,9 +23,9 @@ export class ProductService extends CrudService {
     private fileService: FileService,
     private supplierService: SupplierService,
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, PRODUCT_CACHE_KEY);
+    super(cacheService, prisma, PRODUCT_CACHE_KEY);
   }
 
   async create(createProductDto: CreateProductDto) {

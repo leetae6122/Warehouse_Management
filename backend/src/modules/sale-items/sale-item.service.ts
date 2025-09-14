@@ -1,21 +1,20 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSaleItemDto } from './dto/create-sale-item.dto';
 import { UpdateSaleItemDto } from './dto/update-sale-item.dto';
 import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
 import { SaleItemDto } from './dto/sale-item.dto';
-import { CrudService } from 'src/common/crud/crud.service';
-import { Cache } from 'cache-manager';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { SALE_ITEM_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { SALE_ITEM_CACHE_KEY } from 'src/modules/cache/cache.constant';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class SaleItemsService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, SALE_ITEM_CACHE_KEY);
+    super(cacheService, prisma, SALE_ITEM_CACHE_KEY);
   }
 
   async create(createSaleItemDto: CreateSaleItemDto) {
@@ -23,7 +22,7 @@ export class SaleItemsService extends CrudService {
       data: createSaleItemDto,
       include: {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     };
     return (await this.createData(args)) as SaleItemDto;
@@ -34,7 +33,7 @@ export class SaleItemsService extends CrudService {
       {},
       {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     )) as SaleItemDto[];
   }
@@ -44,7 +43,7 @@ export class SaleItemsService extends CrudService {
       { id },
       {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     )) as SaleItemDto;
     if (!item) throw new NotFoundException(MSG_NOT_FOUND('Sale Item'));
@@ -60,7 +59,7 @@ export class SaleItemsService extends CrudService {
       },
       {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     )) as SaleItemDto[];
   }
@@ -70,7 +69,7 @@ export class SaleItemsService extends CrudService {
       { transactionId },
       {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     )) as SaleItemDto[];
   }
@@ -80,7 +79,7 @@ export class SaleItemsService extends CrudService {
       { productId },
       {
         product: true,
-        transaction: true,
+        saleTransaction: true,
       },
     )) as SaleItemDto[];
   }

@@ -1,24 +1,23 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { hashData, hashTokenSHA256 } from 'src/common/utils/hash.util';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { CrudService } from 'src/common/crud/crud.service';
-import { USER_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { USER_CACHE_KEY } from 'src/modules/cache/cache.constant';
 import { UserDto } from './dto/user.dto';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class UserService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, USER_CACHE_KEY);
+    super(cacheService, prisma, USER_CACHE_KEY);
   }
 
-  async create(createUserDto: CreateUserDto) {
+  async create(createUserDto: CreateUserDto): Promise<UserDto> {
     const hashedPassword = await hashData(createUserDto.password);
 
     const args = {
@@ -30,7 +29,7 @@ export class UserService extends CrudService {
     return (await this.createData(args)) as UserDto;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<UserDto> {
     const updateData: UpdateUserDto = { ...updateUserDto };
     if (updateUserDto.password) {
       updateData.password = await hashData(updateUserDto.password);

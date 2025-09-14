@@ -1,20 +1,19 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
-import { CrudService } from 'src/common/crud/crud.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { Cache } from 'cache-manager';
-import { CATEGORY_CACHE_KEY } from 'src/common/crud/cache.constant';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { CATEGORY_CACHE_KEY } from 'src/modules/cache/cache.constant';
 import { CategoryDto } from './dto/category.dto';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class CategoryService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, CATEGORY_CACHE_KEY);
+    super(cacheService, prisma, CATEGORY_CACHE_KEY);
   }
 
   async create(createCategoryDto: CreateCategoryDto) {

@@ -1,24 +1,23 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateSupplierDto } from './dto/create-supplier.dto';
 import { UpdateSupplierDto } from './dto/update-supplier.dto';
 import { MSG_NOT_FOUND } from 'src/common/utils/message.util';
-import { CrudService } from 'src/common/crud/crud.service';
-import { CACHE_MANAGER } from '@nestjs/cache-manager';
-import { SUPPLIER_CACHE_KEY } from 'src/common/crud/cache.constant';
-import { Cache } from 'cache-manager';
+import { CrudService } from 'src/modules/crud/crud.service';
+import { SUPPLIER_CACHE_KEY } from 'src/modules/cache/cache.constant';
 import { SupplierDto } from './dto/supplier.dto';
+import { CacheService } from '../cache/cache.service';
 
 @Injectable()
 export class SupplierService extends CrudService {
   constructor(
     protected readonly prisma: PrismaService,
-    @Inject(CACHE_MANAGER) protected readonly cacheManager: Cache,
+    protected readonly cacheService: CacheService,
   ) {
-    super(cacheManager, prisma, SUPPLIER_CACHE_KEY);
+    super(cacheService, prisma, SUPPLIER_CACHE_KEY);
   }
 
-  async create(createSupplierDto: CreateSupplierDto) {
+  async create(createSupplierDto: CreateSupplierDto): Promise<SupplierDto> {
     const args = {
       data: createSupplierDto,
       include: {
@@ -33,7 +32,10 @@ export class SupplierService extends CrudService {
     return (await this.createData(args)) as SupplierDto;
   }
 
-  async update(id: number, updateSupplierDto: UpdateSupplierDto) {
+  async update(
+    id: number,
+    updateSupplierDto: UpdateSupplierDto,
+  ): Promise<SupplierDto> {
     await this.findOne(id);
     const args = {
       where: { id },
@@ -50,7 +52,7 @@ export class SupplierService extends CrudService {
     return (await this.updateData(args)) as SupplierDto;
   }
 
-  async findAll() {
+  async findAll(): Promise<SupplierDto[]> {
     return (await this.getManyData(
       {},
       {
@@ -60,7 +62,7 @@ export class SupplierService extends CrudService {
     )) as SupplierDto[];
   }
 
-  async findOne(id: number) {
+  async findOne(id: number): Promise<SupplierDto> {
     const supplier = (await this.getDataByUnique(
       { id },
       {
@@ -78,7 +80,7 @@ export class SupplierService extends CrudService {
     return supplier;
   }
 
-  async findByListId(ids: number[]) {
+  async findByListId(ids: number[]): Promise<SupplierDto[]> {
     return (await this.getManyData(
       {
         id: {
